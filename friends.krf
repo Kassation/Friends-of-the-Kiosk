@@ -1,0 +1,133 @@
+(in-microtheory UserProfilesMt)
+(isa UserProfiles FirstOrderCollection)
+(isa UserProfile UserProfiles)
+(isa NathanTimmerman UserProfile) ;;; or “Nathan Timmerman”?
+;;; depends on how we can take user input and transform it
+(isa UserCSInterest FirstOrderCollection)
+;;; possible(/preferable?) to save these as a set?
+(isa UserCSInterest BinaryPredicate)
+(arity UserCSInterest 2)
+(arg1Isa UserCSInterest UserProfiles)
+(arg2Isa UserCSInterest FieldOfStudy)
+(UserCSInterest NathanTimmerman ArtificialIntelligence)
+;;; so when user says an interest, do:
+;;; (doRecord 
+;;;        (ist-Information UserProfilesMt (UserCSInterest ?user ?interest)))
+;;; NOTE: have to keep track of which user is currently being talked to
+;;; how?
+(isa currentUser Predicate)
+(arity currentUser 2)
+(arg1Isa currentUser IBTGeneration)
+(arg2Isa currentUser UserProfile)
+
+
+;;; (achieve :receiver interaction-manager :content (startUserProfiles)) to start
+(in-microtheory Interaction-ManagerMt)
+
+(isa userProfilesActive Predicate)
+(arity userProfilesActive 0)
+(comment userProfilesActive 
+  "(userProfilesActive) holds when the UserProfiles is being used to
+   implement the Getting-to-know-people.")
+
+(isa startUserProfiles ComplexActionPredicate)
+(arity startUserProfiles 0)
+(comment startUserProfiles
+  "(startUserProfiles) tweaks the Interaction Manager to use semantic 
+   interpretation methods that implement the Getting-to-know-people.")
+
+(preconditionForMethod 
+ (true)
+ (methodForAction
+  (startUserProfiles)
+  (actionSequence
+   (TheList 
+    (doRecordMembers
+     (TheSet
+      (ist-Information KioskDataMt
+        (<== (preferInContext
+              (checkUnderstanding ?context ?sid
+                                  ?discourse)
+              ?seq1 ?seq2)
+             (containsPattern (checkITUnderstanding ?context ?sid ?discourse)
+                              ?seq1)))
+      (userProfilesActive)
+      (genlMt KioskDataMt UserProfilesMt)
+      )
+      )
+      (doAnnounce "Starting UserProfiles. What is your name?" nil)))))
+
+(isa checkITUnderstanding ComplexActionPredicate)
+(arity checkITUnderstanding 3)
+(arg1Isa checkITUnderstanding Microtheory)
+(arg2Isa checkITUnderstanding CycLTerm)
+(arg3Isa checkITUnderstanding Microtheory)
+(comment checkITUnderstanding
+  "(checkITUnderstanding ?context ?sid ?discourse) does the semantic analysis
+   needed to recognize dialogue acts and domain semantics for the Getting-to-know-people.")
+
+(preconditionForMethod 
+ (userProfilesActive)
+ (methodForAction
+  (checkUnderstanding ?context ?sid ?discourse)
+  (actionSequence
+   (TheList
+    (doAnnounce "Using  Getting-to-know-people methods.")
+    (checkITUnderstanding ?context ?sid ?discourse)))))
+
+(preconditionForMethod 
+ (and (userProfilesActive)
+      (outsourcedOnly (currentDiscourseId ?d-id))
+      (ist-Information (DiscourseCaseFn ?d-id)
+        (sentenceInDiscourse ?sid ?s-index ?wordslist))
+      (evaluate ?next-index (PlusFn 1 ?s-index)))
+ (methodForAction 
+  (checkITUnderstanding ?context ?sid ?discourse)
+  (actionSequence
+   (TheList 
+    (doAnnounce "Running  Getting-to-know-people narrative functions.")
+    (doEADiscourseInterpretation
+     UserProfiles-NFMt ?s-index ?next-index)))))
+
+
+
+(in-microtheory UserProfilesNFMt)
+
+(queryForInterpretation 0
+                        (narrativeFunction (UserProfileEventFn :REPLACE-SID ?event-id)
+                                           ?user
+                                           UserIntroduction)
+										   (doAnnounce "Trader"))
+
+(isa UserIntroduction Collection)
+(comment UserIntroduction
+  "UserIntroduction indicates that the sentence is the human player
+ offering a specific cultural product.")
+
+(isa introducesUser BinaryPredicate)
+(arity introducesUser 2)
+(arg1Isa introducesUser IBTGeneration)
+(arg2Isa introducesUser Thing)
+(comment introducesUser
+  "(introducesUser ?pef ?po) indicates that there is a presentation
+ event ?pef which constitutes offering a cultural product ?po.")
+
+(<== (narrativeFunction (UserProfileEventFn ?sid ?event-id)
+                        ?user UserIntroduction)
+     (introducesUser ?sid ?product-offered)
+     ;; Introduce constant for the event ID
+     (individualSatisfyingConditions 
+      ?event-id IBTGeneration
+      (TheSet (groundExpression ?user))))
+
+(<== (introducesUser ?sid ?user)
+     (ist-Information (DrsCaseFn ?sid)
+       (discourseCaseForDrs ?dcase ?sid))
+     (ist-Information ?dcase (isaPossibleCaseForSentence ?sdrs-id ?sid))
+     (sentenceIndicatesIntroduction ?sdrs-id ?firstWord ?secondWord))
+
+(<== (sentenceIndicatesIntroduction ?sdrs-id ?firstWord ?secondWord)
+     (ist-Information (DrsCaseFn ?sdrs-id)
+       (and (isa ?firstWord I-TheWord) (isa ?secondWord Am-TheWord)))
+       (doAnnounce "Shutting down Interstellar Trader"))
+
