@@ -15,6 +15,7 @@
 ;;;        (ist-Information UserProfilesMt (UserCSInterest ?user ?interest)))
 ;;; NOTE: have to keep track of which user is currently being talked to
 ;;; how?
+
 (isa currentUser Predicate)
 (arity currentUser 2)
 (arg1Isa currentUser IBTGeneration)
@@ -46,11 +47,11 @@
     (doRecordMembers
      (TheSet
       (ist-Information Interaction-Manager-KioskMt
-        (<== (preferInContext (interpretAsFriend ?dcase)
+        (<== (preferInContext (answerQuestionViaEEs ?dcase)
               ?seq1 ?seq2)
              (containsPattern (doEADiscourseInterpretation ?mt ?s-id ?n-id) ?seq1)))
-	  (ist-Information Interaction-Manager-KioskMt
-        (<== (preferInContext (interpretAsFriend ?dcase) ?seq1 ?seq2)
+      (ist-Information Interaction-Manager-KioskMt
+        (<== (preferInContext (answerQuestionViaEEs ?dcase) ?seq1 ?seq2)
              (someArgumentHasPredicate ?seq1 userProfilesActive)))
       (userProfilesActive)
       (genlMt Interaction-Manager-KioskMt UserProfilesMt)))
@@ -72,12 +73,11 @@
     (doForgetMembers
      (TheSet
       (ist-Information Interaction-Manager-KioskMt
-        (<== (preferInContext (interpretAsFriend ?dcase)
+        (<== (preferInContext (answerQuestionViaEEs ?dcase)
               ?seq1 ?seq2)
              (containsPattern (doEADiscourseInterpretation ?mt ?s-id ?n-id) ?seq1)))
-	  (ist-Information Interaction-Manager-KioskMt
-        (<== (preferInContext (interpretAsFriend ?dcase) 
-			  ?seq1 ?seq2)
+      (ist-Information Interaction-Manager-KioskMt
+        (<== (preferInContext (answerQuestionViaEEs ?dcase) ?seq1 ?seq2)
              (someArgumentHasPredicate ?seq1 userProfilesActive)))
       (userProfilesActive)
       (genlMt Interaction-Manager-KioskMt UserProfilesMt)))
@@ -101,7 +101,7 @@
         (sentenceInDiscourse ?sid ?s-index ?wordslist))
       (evaluate ?next-index (PlusFn 1 ?s-index)))
  (methodForAction 
-  (interpretAsFriend ?dcase)
+  (answerQuestionViaEEs ?dcase)
   (actionSequence
    (TheList 
     (doSayUtterance ?system-utterance ?p-text)
@@ -121,16 +121,15 @@
       (ist-Information ?dcase
         (getUser ?sentence-id ?user))
       (formattedContentString
-       "You are ~a. " 
-       (TheList ?user) ?utterance-string))
+       "You are ~a. " (TheList ?user) ?utterance-string))
  (methodForAction
   (getMoreInfo ?sid ?dcase)
   (actionSequence
    (TheList
      ;;;(doRecord 
-	   ;;;(ist-Information UserProfilesMt (currentUser ?sid ?user)))
+     ;;;(ist-Information UserProfilesMt (currentUser ?sid ?user)))
      (doSayUtterance ?system-utterance ?utterance-string)
-	 (doAnnounce "You are. " nil)))))
+     (doAnnounce "You are. " nil)))))
 
 (preconditionForMethod
  (and (userProfilesActive)
@@ -140,9 +139,9 @@
       (equals ?string "No.")
       (newReifiedUtterance ?system-utterance)
       (formattedContentString
-       "You said No. " (TheList) ?utterance-string))
+       "You said No. " (TheList) ?utterance-string))    
  (methodForAction
-  (interpretAsFriend ?dcase)
+  (answerQuestionViaEEs ?dcase)
   (actionSequence
    (TheList
     (doSayUtterance ?system-utterance ?utterance-string)))))
@@ -154,7 +153,6 @@
                         (narrativeFunction (PresentationEventFn :REPLACE-SID ?event-id)
                                            ?user
                                            UserIntroduction))
-
 (isa UserIntroduction Collection)
 (genls UserIntroduction Informing)
 (comment UserIntroduction
@@ -178,6 +176,6 @@
      (ist-Information ?dcase (isaPossibleCaseForSentence ?sdrs-id ?sid))
      (isName ?sdrs-id ?user))
 
-(<== (isName ?sdrs-id ComputerScience)
+(<== (isName ?sdrs-id ?name)
      (ist-Information (DrsCaseFn ?sdrs-id)
        (isa ?name HumanGivenName)))
