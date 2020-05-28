@@ -22,7 +22,7 @@
 
 
 ;;; (achieve :receiver interaction-manager :content (startUserProfiles)) to start
-(in-microtheory Interaction-ManagerMt)
+(in-microtheory Interaction-Manager-KioskMt)
 
 (isa userProfilesActive Predicate)
 (arity userProfilesActive 0)
@@ -30,6 +30,7 @@
   "(userProfilesActive) holds when the UserProfiles is being used to
    implement the Getting-to-know-people.")
 
+;;;-----START-----
 (isa startUserProfiles ComplexActionPredicate)
 (arity startUserProfiles 0)
 (comment startUserProfiles
@@ -44,90 +45,139 @@
    (TheList 
     (doRecordMembers
      (TheSet
-      (ist-Information KioskDataMt
-        (<== (preferInContext
-              (checkUnderstanding ?context ?sid
-                                  ?discourse)
+      (ist-Information Interaction-Manager-KioskMt
+        (<== (preferInContext (interpretAsFriend ?dcase)
               ?seq1 ?seq2)
-             (containsPattern (checkITUnderstanding ?context ?sid ?discourse)
-                              ?seq1)))
+             (containsPattern (doEADiscourseInterpretation ?mt ?s-id ?n-id) ?seq1)))
+	  (ist-Information Interaction-Manager-KioskMt
+        (<== (preferInContext (interpretAsFriend ?dcase) ?seq1 ?seq2)
+             (someArgumentHasPredicate ?seq1 userProfilesActive)))
       (userProfilesActive)
-      (genlMt KioskDataMt UserProfilesMt)
-      )
-      )
-      (doAnnounce "Starting UserProfiles. What is your name?" nil)))))
+      (genlMt Interaction-Manager-KioskMt UserProfilesMt)))
+    (doAnnounce "Starting UserProfiles. " nil)))))
 
-(isa checkITUnderstanding ComplexActionPredicate)
-(arity checkITUnderstanding 3)
-(arg1Isa checkITUnderstanding Microtheory)
-(arg2Isa checkITUnderstanding CycLTerm)
-(arg3Isa checkITUnderstanding Microtheory)
-(comment checkITUnderstanding
-  "(checkITUnderstanding ?context ?sid ?discourse) does the semantic analysis
-   needed to recognize dialogue acts and domain semantics for the Getting-to-know-people.")
+;;;-----END-----
+(isa endUserProfiles ComplexActionPredicate)
+(arity endUserProfiles 0)
+(comment endUserProfiles
+  "(endUserProfiles) tweaks the Interaction Manager to use semantic 
+   interpretation methods that implement the Getting-to-know-people.")
 
 (preconditionForMethod 
- (userProfilesActive)
+ (true)
  (methodForAction
-  (checkUnderstanding ?context ?sid ?discourse)
+  (endUserProfiles)
   (actionSequence
-   (TheList
-    (doAnnounce "Using  Getting-to-know-people methods.")
-    (checkITUnderstanding ?context ?sid ?discourse)))))
+   (TheList 
+    (doForgetMembers
+     (TheSet
+      (ist-Information Interaction-Manager-KioskMt
+        (<== (preferInContext (interpretAsFriend ?dcase)
+              ?seq1 ?seq2)
+             (containsPattern (doEADiscourseInterpretation ?mt ?s-id ?n-id) ?seq1)))
+	  (ist-Information Interaction-Manager-KioskMt
+        (<== (preferInContext (interpretAsFriend ?dcase) 
+			  ?seq1 ?seq2)
+             (someArgumentHasPredicate ?seq1 userProfilesActive)))
+      (userProfilesActive)
+      (genlMt Interaction-Manager-KioskMt UserProfilesMt)))
+    (doAnnounce "Ending UserProfiles. " nil)))))
 
-(preconditionForMethod 
- (and (userProfilesActive)
-      (outsourcedOnly (currentDiscourseId ?d-id))
-      (ist-Information (DiscourseCaseFn ?d-id)
+;;;-----INTERPRET-----
+
+
+
+(preconditionForMethod
+ (and (newReifiedUtterance ?system-utterance)
+      (currentAgents ?agents)
+      (not (elementOf psi ?agents))
+      (outsourcedOnly (currentSentenceId ?sid))
+      (ist-Information ?dcase
+        (sentenceText ?sid ?user-utterance))
+      (different ?user-utterance "Yes." "No.")
+      (generateMostAppropriateQuery ?dcase ?response)
+      (subexpressionMatching (psikiSayText ?p-text) ?response ?st)
+      (ist-Information ?dcase
         (sentenceInDiscourse ?sid ?s-index ?wordslist))
       (evaluate ?next-index (PlusFn 1 ?s-index)))
  (methodForAction 
-  (checkITUnderstanding ?context ?sid ?discourse)
+  (interpretAsFriend ?dcase)
   (actionSequence
    (TheList 
-    (doAnnounce "Running  Getting-to-know-people narrative functions.")
+    (doSayUtterance ?system-utterance ?p-text)
+    (doAnnounce "current ?sid: ~a~%" (?sid))
     (doEADiscourseInterpretation
-     UserProfiles-NFMt ?s-index ?next-index)))))
+     UserProfiles-NFMt ?s-index ?next-index)
+    (doAgentPlan
+     (getMoreInfo ?sid ?dcase))))))
 
+(isa getMoreInfo ComplexActionPredicate)
+(arity getMoreInfo 2)
 
+(preconditionForMethod
+ (and (newReifiedUtterance ?system-utterance)
+      (currentUser ?user)
+      (outsourcedOnly (currentSentenceId ?sentence-id))
+      (ist-Information ?dcase
+        (getUser ?sentence-id ?user))
+      (formattedContentString
+       "You are ~a. " 
+       (TheList ?user) ?utterance-string))
+ (methodForAction
+  (getMoreInfo ?sid ?dcase)
+  (actionSequence
+   (TheList
+     ;;;(doRecord 
+	   ;;;(ist-Information UserProfilesMt (currentUser ?sid ?user)))
+     (doSayUtterance ?system-utterance ?utterance-string)
+	 (doAnnounce "You are. " nil)))))
 
-(in-microtheory UserProfilesNFMt)
+(preconditionForMethod
+ (and (kioskFriendActive)
+      (outsourcedOnly (currentSentenceId ?sid))
+      (ist-Information ?dcase
+        (sentenceText ?sid ?string))
+      (equals ?string "No.")
+      (newReifiedUtterance ?system-utterance)
+      (formattedContentString
+       "You said No. " (TheList) ?utterance-string))
+ (methodForAction
+  (interpretAsFriend ?dcase)
+  (actionSequence
+   (TheList
+    (doSayUtterance ?system-utterance ?utterance-string)))))
+
+;;;-----NF-----
+(in-microtheory UserProfiles-NFMt)
 
 (queryForInterpretation 0
-                        (narrativeFunction (UserProfileEventFn :REPLACE-SID ?event-id)
+                        (narrativeFunction (PresentationEventFn :REPLACE-SID ?event-id)
                                            ?user
-                                           UserIntroduction)
-										   (doAnnounce "Trader"))
+                                           UserIntroduction))
 
 (isa UserIntroduction Collection)
+(genls UserIntroduction Informing)
 (comment UserIntroduction
-  "UserIntroduction indicates that the sentence is the human player
- offering a specific cultural product.")
+  "UserIntroduction indicates that the sentence is a person introducing themself to the Kiosk.")
 
-(isa introducesUser BinaryPredicate)
-(arity introducesUser 2)
-(arg1Isa introducesUser IBTGeneration)
-(arg2Isa introducesUser Thing)
-(comment introducesUser
-  "(introducesUser ?pef ?po) indicates that there is a presentation
- event ?pef which constitutes offering a cultural product ?po.")
-
-(<== (narrativeFunction (UserProfileEventFn ?sid ?event-id)
+(<== (narrativeFunction (PresentationEventFn ?sid ?event-id)
                         ?user UserIntroduction)
-     (introducesUser ?sid ?product-offered)
-     ;; Introduce constant for the event ID
-     (individualSatisfyingConditions 
+     (getUser ?sid ?user)
+     (individualSatisfyingConditions
       ?event-id IBTGeneration
       (TheSet (groundExpression ?user))))
 
-(<== (introducesUser ?sid ?user)
+(isa getUser Predicate)
+(arity getUser 2)
+(isa isName Predicate)
+(arity isName 2)
+
+(<== (getUser ?sid ?user)
      (ist-Information (DrsCaseFn ?sid)
        (discourseCaseForDrs ?dcase ?sid))
      (ist-Information ?dcase (isaPossibleCaseForSentence ?sdrs-id ?sid))
-     (sentenceIndicatesIntroduction ?sdrs-id ?firstWord ?secondWord))
+     (isName ?sdrs-id ?user))
 
-(<== (sentenceIndicatesIntroduction ?sdrs-id ?firstWord ?secondWord)
+(<== (isName ?sdrs-id ComputerScience)
      (ist-Information (DrsCaseFn ?sdrs-id)
-       (and (isa ?firstWord I-TheWord) (isa ?secondWord Am-TheWord)))
-       (doAnnounce "Shutting down Interstellar Trader"))
-
+       (isa ?name HumanGivenName)))
