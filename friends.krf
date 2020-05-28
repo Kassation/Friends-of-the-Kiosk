@@ -133,7 +133,7 @@
 	 (doAnnounce "You are. " nil)))))
 
 (preconditionForMethod
- (and (kioskFriendActive)
+ (and (userProfilesActive)
       (outsourcedOnly (currentSentenceId ?sid))
       (ist-Information ?dcase
         (sentenceText ?sid ?string))
