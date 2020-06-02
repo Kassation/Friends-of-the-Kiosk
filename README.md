@@ -12,6 +12,10 @@ KIOSK (if name not in KB): What is your major?
 
 USER: Computer Science.
 
+KIOSK: Which program are you in?
+
+USER: Undergraduate/Master/PhD.
+
 KIOSK: What aspects are you interested in CS?
 
 USER: Artificial Intelligence.
@@ -20,11 +24,11 @@ KIOSK: What food do you like?
 
 USER: [food]
 
-KIOSK: What drink do you like?
+;;; KIOSK: What drink do you like?
 
-USER: [drink]
+;;; USER: [drink]
 
-KIOSK: I would like to recommend [SpecializedKnowledge-Topic]/[SpecifiedFoodDishType]/[Beverages-IndustrySP] to you.
+KIOSK: I would like to recommend [FieldOfStudy]/[DefaultDisjointEdibleStuffType] to you.
 
 USER: OK.
 
