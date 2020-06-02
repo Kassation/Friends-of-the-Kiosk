@@ -1,0 +1,236 @@
+(in-microtheory UserProfilesMt)
+(isa UserProfiles FirstOrderCollection)
+(isa UserProfile UserProfiles)
+(isa NathanTimmerman UserProfile) ;;; or “Nathan Timmerman”?
+;;; depends on how we can take user input and transform it
+(isa UserCSInterest FirstOrderCollection)
+;;; possible(/preferable?) to save these as a set?
+(isa UserCSInterest BinaryPredicate)
+(arity UserCSInterest 2)
+(arg1Isa UserCSInterest UserProfiles)
+(arg2Isa UserCSInterest FieldOfStudy)
+(UserCSInterest NathanTimmerman ArtificialIntelligence)
+;;; so when user says an interest, do:
+;;; (doRecord 
+;;;        (ist-Information UserProfilesMt (UserCSInterest ?user ?interest)))
+;;; NOTE: have to keep track of which user is currently being talked to
+;;; how?
+
+(isa currentUser Predicate)
+(arity currentUser 2)
+(arg1Isa currentUser IBTGeneration)
+(arg2Isa currentUser UserProfile)
+
+
+;;; (achieve :receiver interaction-manager :content (startUserProfiles)) to start
+(in-microtheory Interaction-Manager-KioskMt)
+
+(isa userProfilesActive Predicate)
+(arity userProfilesActive 0)
+(comment userProfilesActive 
+  "(userProfilesActive) holds when the UserProfiles is being used to
+   implement the Getting-to-know-people.")
+
+;;;-----START-----
+(isa startUserProfiles ComplexActionPredicate)
+(arity startUserProfiles 0)
+(comment startUserProfiles
+  "(startUserProfiles) tweaks the Interaction Manager to use semantic 
+   interpretation methods that implement the Getting-to-know-people.")
+
+(preconditionForMethod 
+  (and (newReifiedUtterance ?system-utterance)
+      (currentUser ?user)
+      (formattedContentString
+       "Hello." (TheList ?user) ?utterance-string)) ;
+ (methodForAction
+  (startUserProfiles)
+  (actionSequence
+   (TheList 
+    (doRecordMembers
+     (TheSet
+      (ist-Information Interaction-Manager-KioskMt
+        (<== (preferInContext (answerQuestionViaEEs ?dcase)
+              ?seq1 ?seq2)
+             (containsPattern (doEADiscourseInterpretation ?mt ?s-id ?n-id) ?seq1)))
+      (ist-Information Interaction-Manager-KioskMt
+        (<== (preferInContext (answerQuestionViaEEs ?dcase) ?seq1 ?seq2)
+             (someArgumentHasPredicate ?seq1 userProfilesActive)))
+      (userProfilesActive)
+      (genlMt Interaction-Manager-KioskMt UserProfilesMt)))
+    (doAnnounce "Starting UserProfiles. " nil)
+    (doSayUtterance ?system-utterance ?utterance-string)))))
+
+;;;-----END-----
+(isa endUserProfiles ComplexActionPredicate)
+(arity endUserProfiles 0)
+(comment endUserProfiles
+  "(endUserProfiles) tweaks the Interaction Manager to use semantic 
+   interpretation methods that implement the Getting-to-know-people.")
+
+(preconditionForMethod 
+ (true)
+ (methodForAction
+  (endUserProfiles)
+  (actionSequence
+   (TheList 
+    (doForgetMembers
+     (TheSet
+      (ist-Information Interaction-Manager-KioskMt
+        (<== (preferInContext (answerQuestionViaEEs ?dcase)
+              ?seq1 ?seq2)
+             (containsPattern (doEADiscourseInterpretation ?mt ?s-id ?n-id) ?seq1)))
+      (ist-Information Interaction-Manager-KioskMt
+        (<== (preferInContext (answerQuestionViaEEs ?dcase) ?seq1 ?seq2)
+             (someArgumentHasPredicate ?seq1 userProfilesActive)))
+      (userProfilesActive)
+      (genlMt Interaction-Manager-KioskMt UserProfilesMt)))
+    (doAnnounce "Ending UserProfiles. " nil)))))
+
+
+
+;;;-----INTERPRET-----
+
+(preconditionForMethod
+ (and (newReifiedUtterance ?system-utterance)
+      (userProfilesActive)
+      (outsourcedOnly (currentSentenceId ?sid))
+      ;(currentAgents ?agents)
+      ;(not (elementOf psi ?agents))
+      ;(different ?user-utterance "Yes." "End.")
+      ;(generateMostAppropriateQuery ?dcase ?response)
+      ;(subexpressionMatching (psikiSayText ?p-text) ?response ?st)
+      ;(ist-Information ?dcase
+      ;  (sentenceText ?sid ?user-utterance))
+      ;(ist-Information ?dcase
+      ;  (sentenceInDiscourse ?sid ?s-index ?wordslist))??????????????????????
+
+      (ist-Information (DiscourseCaseFn ?d-id)
+        (sentenceInDiscourse ?sid ?s-index ?wordslist))
+      (evaluate ?next-index (PlusFn 1 ?s-index)))
+ (methodForAction 
+  (answerQuestionViaEEs ?dcase)
+  (actionSequence
+   (TheList 
+    (doSayUtterance ?system-utterance "I hear you. ")    ;?p-text
+    (doAnnounce "current ?sid: ~a~%" (?sid))
+    (doEADiscourseInterpretation
+     UserProfiles-NFMt ?s-index ?next-index)
+    (doAgentPlan
+     (getMoreInfo ?sid ?dcase))))))
+
+(isa getMoreInfo ComplexActionPredicate)
+(arity getMoreInfo 2)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Q
+(preconditionForMethod
+ (and (newReifiedUtterance ?system-utterance)
+      (currentUser ?user)
+      (userProfilesActive)
+      (outsourcedOnly (currentSentenceId ?sentence-id))
+      (ist-Information (DiscourseCaseFn ?d-id) ;?dcase
+        (getUser ?sentence-id ?user))
+      (formattedContentString
+       "You are ~a. " (TheList ?user) ?utterance-string))
+ (methodForAction
+  (getMoreInfo ?sid ?dcase)
+  (actionSequence
+   (TheList
+     ;;;(doRecord 
+	   ;;;(ist-Information UserProfilesMt (currentUser ?sid ?user)))
+     (doRecord (userProfilesActive))
+     (doSayUtterance ?system-utterance "getMoreInfo")
+     (doAnnounce "You are. " nil)))))
+
+;;---You are  
+(preconditionForMethod
+ (and (userProfilesActive)
+      (outsourcedOnly (currentSentenceId ?sid))
+      (ist-Information ?dcase
+        (sentenceText ?sid ?string))
+      (equals ?string "Who am I?")
+      (newReifiedUtterance ?system-utterance)
+      (currentUser ?user)
+      (formattedContentString
+       "You are ~a. " (TheList ?user) ?utterance-string))
+ (methodForAction
+  (answerQuestionViaEEs ?dcase)
+  (actionSequence
+   (TheList
+    (doRecord (userProfilesActive))
+    (doSayUtterance ?system-utterance ?utterance-string)))))
+
+;;---CS?
+(preconditionForMethod
+ (and (userProfilesActive)
+      (outsourcedOnly (currentSentenceId ?sid))
+      (ist-Information ?dcase
+        (sentenceText ?sid ?string))
+      (equals ?string "OK.")
+      (newReifiedUtterance ?system-utterance)
+      (currentUser ?user)
+      (formattedContentString
+       "Are you a CS student?" (TheList ?user) ?utterance-string))
+ (methodForAction
+  (answerQuestionViaEEs ?dcase)
+  (actionSequence
+   (TheList
+    (doRecord (userProfilesActive))
+    (doSayUtterance ?system-utterance ?utterance-string)))))
+
+
+;;---exit
+(preconditionForMethod
+ (and (userProfilesActive)
+      (outsourcedOnly (currentSentenceId ?sid))
+      (ist-Information ?dcase
+        (sentenceText ?sid ?string))
+      (equals ?string "Exit.")
+      (newReifiedUtterance ?system-utterance)
+      (currentUser ?user)
+      (formattedContentString
+       "Goodbye, ~a. " (TheList ?user) ?utterance-string))
+ (methodForAction
+  (answerQuestionViaEEs ?dcase)
+  (actionSequence
+   (TheList
+    (doRecord (userProfilesActive))
+    (doAgentPlan (endUserProfiles))
+    (doSayUtterance ?system-utterance ?utterance-string)))))
+
+;;;-----NF-----
+(in-microtheory UserProfiles-NFMt)
+
+(queryForInterpretation 0
+                        (narrativeFunction (PresentationEventFn :REPLACE-SID ?event-id)
+                                           ?user
+                                           UserIntroduction))
+(isa UserIntroduction Collection)
+(genls UserIntroduction Informing)
+(comment UserIntroduction
+  "UserIntroduction indicates that the sentence is a person introducing themself to the Kiosk.")
+
+(<== (narrativeFunction (PresentationEventFn ?sid ?event-id)
+                        ?user UserIntroduction)
+     (getUser ?sid ?user)
+     (individualSatisfyingConditions
+      ?event-id IBTGeneration
+      (TheSet (groundExpression ?user)))
+      (doSayUtterance ?system-utterance "NF"))
+
+(isa getUser Predicate)
+(arity getUser 2)
+(isa isName Predicate)
+(arity isName 2)
+
+(<== (getUser ?sid ?user)
+     (ist-Information (DrsCaseFn ?sid)
+       (discourseCaseForDrs ?dcase ?sid))
+     (ist-Information ?dcase (isaPossibleCaseForSentence ?sdrs-id ?sid))
+     (isName ?sdrs-id ?firstWord ?secondWord ?name)
+     (doSayUtterance ?system-utterance "get user"))
+
+(<== (isName ?sdrs-id ?firstWord ?secondWord ?name)
+     (ist-Information (DrsCaseFn ?sdrs-id)
+     (and (isa ?firstWord I-TheWord) (isa ?secondWord Am-TheWord) (isa ?name HumanGivenName)))
+     (doSayUtterance ?system-utterance "I am [name]" nil))
+
