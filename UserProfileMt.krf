@@ -1,42 +1,77 @@
-(isa KioskFriendsDataMt Microtheory)         					
-;;; like NUPeopleDataMt
+(isa KioskFriendsDataMt Microtheory)         ;;; like NUPeopleDataMt
 (genlMt KioskDataMt KioskFriendsDataMt)
 (genlMt KioskFriendsDataMt BaseKB)
 (genlMt KioskFriendsDataMt UniversalVocabularyMt)
-(genlMt KioskFriendsDataMt (SocialModelMtFn NathanTimmerman))
-(genlMt (SocialModelMtFn NathanTimmerman) BaseKB)
-(genlMt (SocialModelMtFn NathanTimmerman) SocialModelingMt)
-(genlMt (SocialModelMtFn NathanTimmerman) UniversalVocabularyMt)
-(isa (SocialModelMtFn NathanTimmerman) Microtheory)
 
 (isa UserCSInterest FirstOrderCollection)
 (isa UserCSInterest BinaryPredicate)
 (arity UserCSInterest 2)
 (arg1Isa UserCSInterest Person)
 (arg2Isa UserCSInterest FieldOfStudy)
-    
+
+(isa FoodInterest FirstOrderCollection)
+(isa FoodInterest BinaryPredicate)
+(arity FoodInterest 2)
+(arg1Isa FoodInterest Person)
+(arg2Isa FoodInterest DefaultDisjointEdibleStuffType)
+
+
+;;; Profile of Nathan
+
+(genlMt KioskFriendsDataMt (SocialModelMtFn NathanTimmerman))
+(genlMt (SocialModelMtFn NathanTimmerman) BaseKB)
+(genlMt (SocialModelMtFn NathanTimmerman) SocialModelingMt)
+(genlMt (SocialModelMtFn NathanTimmerman) UniversalVocabularyMt)
+(isa (SocialModelMtFn NathanTimmerman) Microtheory)
+
 (in-microtheory (SocialModelMtFn NathanTimmerman))
 (isa NathanTimmerman NUStudent)
+(isa NathanTimmerman NUUndergraduate)
 (studentMajor NathanTimmerman ComputerScienceDepartment)
 
 (UserCSInterest NathanTimmerman ArtificialIntelligence)                            
-;;; CSInterest should be ontologizd (CSInterest ?NUStudent ?ComputerScience-Topic)
-;;; There is a collection named ArtificialIntelligence-Topic in the KB, but is a spec of SpecializedKnowledge-Topic
-;;; we can ontologized some topics under the ComputerScience-Topic collection
-(isa FoodInterest BinaryPredicate)
-(isa FoodInterest FirstOrderCollection)
-(arity FoodInterest 2)
-(arg1Isa FoodInterest Person)
-(arg2Isa FoodInterest SpecifiedFoodDishType)
-(FoodInterest NathanTimmerman [food])
+(FoodInterest NathanTimmerman ApplePie)
+(FoodInterest NathanTimmerman CoconutMilk)
 
-(isa DrinkInterest BinaryPredicate)
-(isa DrinkInterest FirstOrderCollection)
-(arity DrinkInterest 2)
-(arg1Isa DrinkInterest Person)
-(arg2Isa DrinkInterest Beverages-IndustrySP)
-(DrinkInterest NathanTimmerman [drink])
-
-(in-microtheory NUPeopleLanguageInfoMt)
 (indexedProperName (TheList nathan) timmerman NathanTimmerman)
 (indexedProperName (TheList) nathan NathanTimmerman)
+
+;;; Profile of Jing
+
+(genlMt KioskFriendsDataMt (SocialModelMtFn JingZhang))
+(genlMt (SocialModelMtFn JingZhang) BaseKB)
+(genlMt (SocialModelMtFn JingZhang) SocialModelingMt)
+(genlMt (SocialModelMtFn JingZhang) UniversalVocabularyMt)
+(isa (SocialModelMtFn JingZhang) Microtheory)
+
+(in-microtheory (SocialModelMtFn JingZhang))
+(isa JingZhang NUStudent)
+(isa JingZhang NUMastersStudent)
+(studentMajor JingZhang ComputerScienceDepartment)
+
+(UserCSInterest JingZhang ArtificialIntelligence)                            
+(FoodInterest JingZhang ApplePie)
+;;;(FoodInterest JingZhang CoconutMilk)
+
+(indexedProperName (TheList jing) zhang JingZhang)
+(indexedProperName (TheList) jing JingZhang)
+
+;;; Profile of Tianqi
+
+(genlMt KioskFriendsDataMt (SocialModelMtFn TianqiCai))
+(genlMt (SocialModelMtFn TianqiCai) BaseKB)
+(genlMt (SocialModelMtFn TianqiCai) SocialModelingMt)
+(genlMt (SocialModelMtFn TianqiCai) UniversalVocabularyMt)
+(isa (SocialModelMtFn TianqiCai) Microtheory)
+
+(in-microtheory (SocialModelMtFn TianqiCai))
+(isa TianqiCai NUStudent)
+(isa TianqiCai NUMastersStudent)
+(studentMajor TianqiCai ComputerScienceDepartment)
+
+;;; (UserCSInterest TianqiCai ArtificialIntelligence)                            
+(FoodInterest TianqiCai ApplePie)
+(FoodInterest TianqiCai CoconutMilk)
+
+(indexedProperName (TheList tianqi) cai TianqiCai)
+(indexedProperName (TheList) tianqi TianqiCai)
