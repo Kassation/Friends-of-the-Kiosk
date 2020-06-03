@@ -26,7 +26,7 @@
 
 (in-microtheory (SocialModelMtFn NathanTimmerman))
 (isa NathanTimmerman NUStudent)
-(isa NathanTimmerman NUUndergraduate)
+;;; (isa NathanTimmerman NUUndergraduate)
 (studentMajor NathanTimmerman ComputerScienceDepartment)
 
 (UserCSInterest NathanTimmerman ArtificialIntelligence)                            
@@ -46,7 +46,7 @@
 
 (in-microtheory (SocialModelMtFn JingZhang))
 (isa JingZhang NUStudent)
-(isa JingZhang NUMastersStudent)
+;;; (isa JingZhang NUMastersStudent)
 (studentMajor JingZhang ComputerScienceDepartment)
 
 (UserCSInterest JingZhang ArtificialIntelligence)                            
@@ -66,7 +66,7 @@
 
 (in-microtheory (SocialModelMtFn TianqiCai))
 (isa TianqiCai NUStudent)
-(isa TianqiCai NUMastersStudent)
+;;; (isa TianqiCai NUMastersStudent)
 (studentMajor TianqiCai ComputerScienceDepartment)
 
 ;;; (UserCSInterest TianqiCai ArtificialIntelligence)                            
@@ -75,3 +75,6 @@
 
 (indexedProperName (TheList tianqi) cai TianqiCai)
 (indexedProperName (TheList) tianqi TianqiCai)
+
+
+
