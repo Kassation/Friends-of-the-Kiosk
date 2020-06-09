@@ -132,7 +132,7 @@
 
 ;;; OfferingACulturalProduct
 (isa UserIntroduction Collection)
-(genls UserIntroduction Informing)
+(genls UserIntroduction CommunicationAct-Single)
 (comment UserIntroduction
   "UserIntroduction indicates that the sentence is a person introducing 
   themself to the Kiosk.")
@@ -162,8 +162,8 @@
      (ist-Information (DrsCaseFn ?sid)
        (discourseCaseForDrs ?dcase ?sid))
      (ist-Information ?dcase (isaPossibleCaseForSentence ?sdrs-id ?sid))
-     (sentenceIndicatesOffer ?sdrs-id ?pref-verb)
-     (sentenceOffersProduct ?sdrs-id ?pref-verb ?preference))
+     (sentenceIndicatesPreference ?sdrs-id ?pref-verb)
+     (sentenceLikesPreference ?sdrs-id ?pref-verb ?preference))
 
 ;;; sentenceIndicatesOffer
 
