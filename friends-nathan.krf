@@ -1,4 +1,5 @@
 ;;; (achieve :receiver interaction-manager :content (startUserProfiles)) to start
+;;; (achieve :receiver interaction-manager :content (endUserProfiles)) to end
 (in-microtheory Interaction-Manager-KioskMt)
 
 (isa UserProfilesMt Microtheory)
@@ -29,10 +30,9 @@
      (TheSet
       (ist-Information Interaction-Manager-KioskMt
         (<== (preferInContext
-              (checkUnderstanding ?context ?sid
-                                  ?discourse)
+              (answerQuestionViaEEs ?dcase)
               ?seq1 ?seq2)
-             (containsPattern (checkUPUnderstanding ?context ?sid ?discourse)
+             (containsPattern (checkUPUnderstanding ?dcase)
                               ?seq1)))
       ;;; make new Mt for user
       (isa (SocialModelMtFn ?user) Microtheory)
@@ -61,10 +61,9 @@
      (TheSet
       (ist-Information Interaction-Manager-KioskMt
         (<== (preferInContext
-              (checkUnderstanding ?context ?sid
-                                  ?discourse)
+              (answerQuestionViaEEs ?dcase)
               ?seq1 ?seq2)
-             (containsPattern (checkUPUnderstanding ?context ?sid ?discourse)
+             (containsPattern (checkUPUnderstanding ?dcase)
                               ?seq1)))
       (userProfilesActive)
       (genlMt Interaction-Manager-KioskMt UserProfilesMt)))
@@ -73,10 +72,10 @@
 
 
 (isa checkUPUnderstanding ComplexActionPredicate)
-(arity checkUPUnderstanding 3)
+(arity checkUPUnderstanding 1)
 (arg1Isa checkUPUnderstanding Microtheory)
-(arg2Isa checkUPUnderstanding CycLTerm)
-(arg3Isa checkUPUnderstanding Microtheory)
+;;;(arg2Isa checkUPUnderstanding CycLTerm)
+;;;(arg3Isa checkUPUnderstanding Microtheory)
 (comment checkUPUnderstanding
   "(checkUPUnderstanding ?context ?sid ?discourse) does the semantic analysis
    needed to recognize dialogue acts and domain semantics for FotK.")
@@ -85,33 +84,51 @@
 (preconditionForMethod 
  (userProfilesActive)
  (methodForAction
-  (checkUnderstanding ?context ?sid ?discourse)
+  (answerQuestionViaEEs ?dcase)
   (actionSequence
    (TheList
     (doAnnounce "Using FotK methods.")
-    (checkUPUnderstanding ?context ?sid ?discourse)))))
+    (checkUPUnderstanding ?dcase)))))
 
 (preconditionForMethod 
  (and (userProfilesActive)
-      (outsourcedOnly (currentDiscourseId ?d-id))
-      (ist-Information (DiscourseCaseFn ?d-id)
-        (sentenceInDiscourse ?sid ?s-index ?wordslist))
-      (evaluate ?next-index (PlusFn 1 ?s-index)))
+      ;;;(outsourcedOnly (currentDiscourseId ?d-id))
+      ;;;(ist-Information (DiscourseCaseFn ?d-id)
+      ;;;  (sentenceInDiscourse ?sid ?s-index ?wordslist))
+      ;;;(evaluate ?next-index (PlusFn 1 ?s-index))
+      (currentUser ?user))
  (methodForAction 
-  (checkUPUnderstanding ?context ?sid ?discourse)
+  (checkUPUnderstanding ?dcase)
   (actionSequence
    (TheList 
     (doAnnounce "Running FotK narrative functions.")
     (doEADiscourseInterpretation
-     UserProfiles-NFMt ?s-index ?next-index)))))
+     UserProfiles-NFMt 0 nil)))))
 
 ;;;-----NF-----
 (in-microtheory UserProfiles-NFMt)
 
-(queryForInterpretation 0
-                        (narrativeFunction (PresentationEventFn :REPLACE-SID ?event-id)
+;;;(queryForInterpretation 0
+;;;                        (narrativeFunction (PresentationEventFn :REPLACE-SID ?event-id)
+;;;                                           ?preference
+;;;                                           UserIntroduction))
+
+(queryForInterpretation 0 (runFotK-NF))
+
+(preconditionForMethod 
+ (currentUser ?user)
+ (methodForAction 
+  (runFotK-NF)
+  (actionSequence
+   (TheList 
+    (doAnnounce "I AM RUNNING...")
+    (narrativeFunction (PresentationEventFn :REPLACE-SID ?event-id)
                                            ?preference
                                            UserIntroduction))
+    (doRecord
+      (ist-Information (SocialModelMtFn ?user)
+        (UserCSInterest ?user ?preference)))
+  )))
 
 ;;; OfferingACulturalProduct
 (isa UserIntroduction Collection)
