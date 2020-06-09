@@ -1,7 +1,7 @@
 ;;; (achieve :receiver interaction-manager :content (startUserProfiles)) to start
 (in-microtheory Interaction-Manager-KioskMt)
 
-(isa UserProfileMt Microtheory)
+(isa UserProfilesMt Microtheory)
 
 (isa userProfilesActive Predicate)
 (arity userProfilesActive 0)
@@ -148,7 +148,7 @@
        (discourseCaseForDrs ?dcase ?sid))
      (ist-Information ?dcase (isaPossibleCaseForSentence ?sdrs-id ?sid))
      (sentenceIndicatesOffer ?sdrs-id ?pref-verb)
-     (sentenceOffersProduct ?sdrs-id ?pref-verb ?prefernce))
+     (sentenceOffersProduct ?sdrs-id ?pref-verb ?preference))
 
 ;;; sentenceIndicatesOffer
 
