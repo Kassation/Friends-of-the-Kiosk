@@ -82,7 +82,7 @@
 
 ;;; Dispatch to checkUPUnderstanding if the game is active.
 (preconditionForMethod 
- (userProfilesActive)
+    (userProfilesActive)
  (methodForAction
   (answerQuestionViaEEs ?dcase)
   (actionSequence
@@ -92,10 +92,13 @@
 
 (preconditionForMethod 
  (and (userProfilesActive)
-      ;;;(outsourcedOnly (currentDiscourseId ?d-id))
-      ;;;(ist-Information (DiscourseCaseFn ?d-id)
-      ;;;  (sentenceInDiscourse ?sid ?s-index ?wordslist))
-      ;;;(evaluate ?next-index (PlusFn 1 ?s-index))
+      (outsourcedOnly (currentSentenceId ?sid))
+      (ist-Information ?dcase
+        (sentenceText ?sid ?user-utterance))
+      (generateMostAppropriateQuery ?dcase ?response)
+      (ist-Information ?dcase
+        (sentenceInDiscourse ?sid ?s-index ?wordslist))
+      (evaluate ?next-index (PlusFn 1 ?s-index))
       (currentUser ?user))
  (methodForAction 
   (checkUPUnderstanding ?dcase)
@@ -103,29 +106,36 @@
    (TheList 
     (doAnnounce "Running FotK narrative functions.")
     (doEADiscourseInterpretation
-     UserProfiles-NFMt 0 nil)))))
+     UserProfiles-NFMt ?s-index ?next-index)))))
 
 ;;;-----NF-----
 (in-microtheory UserProfiles-NFMt)
 
-;;;(queryForInterpretation 0
-;;;                        (narrativeFunction (PresentationEventFn :REPLACE-SID ?event-id)
-;;;                                           ?preference
-;;;                                           UserIntroduction))
-
-(queryForInterpretation 0 (runFotKNF))
-
-(<== (runFotKNF ?preference)
-     (doAnnounce "I AM RUNNING.")
-     (currentUser ?user)
-     (narrativeFunction (PresentationEventFn :REPLACE-SID ?event-id)
+(queryForInterpretation 0
+                        (narrativeFunction (PresentationEventFn :REPLACE-SID ?event-id)
                                            ?preference
-                                           UserIntroduction)
-     (doRecord
-      (ist-Information (SocialModelMtFn ?user)
-        (UserCSInterest ?user ?preference)))
-     )
+                                           UserIntroduction))
 
+;;;(queryForInterpretation 0 (runFotKNF))
+
+;;;(<== (runFotKNF ?preference)
+;;;     (doAgentPlan (getPreference))
+;;;     )
+
+(preconditionForMethod
+  (currentUser ?user)
+  (methodForAction
+    (getPreference)
+    (actionSequence
+      (TheList 
+        (doAnnounce "I AM RUNNING.")
+        (narrativeFunction (PresentationEventFn :REPLACE-SID ?event-id)
+                                              ?preference
+                                              UserIntroduction)
+        (doRecord
+          (ist-Information (SocialModelMtFn ?user)
+            (UserCSInterest ?user ?preference)))))
+    ))
 
 ;;;(preconditionForMethod 
 ;;; (currentUser ?user)
