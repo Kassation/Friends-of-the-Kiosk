@@ -77,7 +77,7 @@
 ;;;(arg2Isa checkUPUnderstanding CycLTerm)
 ;;;(arg3Isa checkUPUnderstanding Microtheory)
 (comment checkUPUnderstanding
-  "(checkUPUnderstanding ?context ?sid ?discourse) does the semantic analysis
+  "(checkUPUnderstanding ?dcase) does the semantic analysis
    needed to recognize dialogue acts and domain semantics for FotK.")
 
 ;;; Dispatch to checkUPUnderstanding if the game is active.
@@ -108,27 +108,38 @@
 ;;;-----NF-----
 (in-microtheory UserProfiles-NFMt)
 
-;;;(queryForInterpretation 0
-;;;                        (narrativeFunction (PresentationEventFn :REPLACE-SID ?event-id)
-;;;                                           ?preference
-;;;                                           UserIntroduction))
-
-(queryForInterpretation 0 (runFotK-NF))
-
-(preconditionForMethod 
- (currentUser ?user)
- (methodForAction 
-  (runFotK-NF)
-  (actionSequence
-   (TheList 
-    (doAnnounce "I AM RUNNING...")
-    (narrativeFunction (PresentationEventFn :REPLACE-SID ?event-id)
+(queryForInterpretation 0
+                        (narrativeFunction (PresentationEventFn :REPLACE-SID ?event-id)
                                            ?preference
                                            UserIntroduction))
-    (doRecord
-      (ist-Information (SocialModelMtFn ?user)
-        (UserCSInterest ?user ?preference)))
-  )))
+
+;;; (queryForInterpretation 0 (runFotKNF))
+
+;;;(<== (runFotKNF ?preference)
+;;;     (doAnnounce "I AM RUNNING.")
+;;;     (narrativeFunction (PresentationEventFn :REPLACE-SID ?event-id)
+;;;                                           ?preference
+;;;                                           UserIntroduction)
+;;;     (doRecord
+;;;      (ist-Information (SocialModelMtFn ?user)
+;;;        (UserCSInterest ?user ?preference)))
+;;;     )
+
+
+;;;(preconditionForMethod 
+;;; (currentUser ?user)
+;;; (methodForAction 
+;;;  (runFotKNF)
+;;;  (actionSequence
+;;;   (TheList 
+;;;    (doAnnounce "I AM RUNNING.")
+;;;    (narrativeFunction (PresentationEventFn :REPLACE-SID ?event-id)
+;;;                                           ?preference
+;;;                                           UserIntroduction)
+;;;    (doRecord
+;;;      (ist-Information (SocialModelMtFn ?user)
+;;;        (UserCSInterest ?user ?preference))))
+;;;  )))
 
 ;;; OfferingACulturalProduct
 (isa UserIntroduction Collection)
@@ -222,14 +233,20 @@
      (kbOnly 
       (useTransitiveInference
        (ist-Information UniversalVocabularyMt
-         (isa ?product DefaultDisjointEdibleStuffType)))))
+         (isa ?product DefaultDisjointEdibleStuffType))))
+     (doRecord
+        (ist-Information (SocialModelMtFn nathan)
+          (FoodInterest nathan ?preference))))
 
 (<== (reasonablePreference ?product)
      ;; CS Topic
      (kbOnly 
       (useTransitiveInference
        (ist-Information UniversalVocabularyMt 
-         (isa ?product FieldOfStudy)))))
+         (isa ?product FieldOfStudy))))
+      (doRecord
+        (ist-Information (SocialModelMtFn nathan)
+          (UserCSInterest nathan ?preference))))
 
 
 ;;; Tell the abduction method something about your preferences
