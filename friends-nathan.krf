@@ -229,12 +229,12 @@
   "(reasonablePreference ?thing) holds when ?thing is the sort of 
   preference that can be saved by FotK.")
 
-(<== (reasonablePreference ?product)
+(<== (reasonablePreference ?preference)
      ;; Food
      (kbOnly 
       (useTransitiveInference
        (ist-Information UniversalVocabularyMt
-         (isa ?product DefaultDisjointEdibleStuffType))))
+         (isa ?preference DefaultDisjointEdibleStuffType))))
 )
 
 (<== (reasonablePreference ?product)
@@ -242,7 +242,7 @@
      (kbOnly 
       (useTransitiveInference
        (ist-Information UniversalVocabularyMt 
-         (isa ?product FieldOfStudy))))
+         (isa ?preference FieldOfStudy))))
 )
 
 
