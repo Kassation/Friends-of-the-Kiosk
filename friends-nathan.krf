@@ -110,7 +110,7 @@
 
 (queryForInterpretation 0
                         (narrativeFunction (PresentationEventFn :REPLACE-SID ?event-id)
-                                           ?user
+                                           ?preference
                                            UserIntroduction))
 
 ;;; OfferingACulturalProduct
