@@ -107,7 +107,7 @@
     (doAnnounce "Running FotK narrative functions.")
     (doEADiscourseInterpretation
      UserProfiles-NFMt ?s-index ?next-index)
-     (gatherInfo)))))
+     ))))
 
 
 (preconditionForMethod
