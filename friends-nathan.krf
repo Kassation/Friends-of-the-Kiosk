@@ -106,7 +106,21 @@
    (TheList 
     (doAnnounce "Running FotK narrative functions.")
     (doEADiscourseInterpretation
-     UserProfiles-NFMt ?s-index ?next-index)))))
+     UserProfiles-NFMt ?s-index ?next-index)
+     (gatherInfo)))))
+
+
+(preconditionForMethod
+  (and (currentUser ?user)
+       ;;; how do i get info from my NF
+  )
+  (methodForAction
+    (gatherInfo)
+    (actionSequence
+      (TheList
+        (doRecord (ist-information (SocialModelMtFn ?user)
+                    (CSInterest ?user ?preference))))))
+)
 
 ;;;-----NF-----
 (in-microtheory UserProfiles-NFMt)
@@ -116,50 +130,12 @@
                                            ?preference
                                            UserIntroduction))
 
-;;;(queryForInterpretation 0 (runFotKNF))
-
-;;;(<== (runFotKNF ?preference)
-;;;     (doAgentPlan (getPreference))
-;;;     )
-
-(preconditionForMethod
-  (currentUser ?user)
-  (methodForAction
-    (getPreference)
-    (actionSequence
-      (TheList 
-        (doAnnounce "I AM RUNNING.")
-        (narrativeFunction (PresentationEventFn :REPLACE-SID ?event-id)
-                                              ?preference
-                                              UserIntroduction)
-        (doRecord
-          (ist-Information (SocialModelMtFn ?user)
-            (UserCSInterest ?user ?preference)))))
-    ))
-
-;;;(preconditionForMethod 
-;;; (currentUser ?user)
-;;; (methodForAction 
-;;;  (runFotKNF)
-;;;  (actionSequence
-;;;   (TheList 
-;;;    (doAnnounce "I AM RUNNING.")
-;;;    (narrativeFunction (PresentationEventFn :REPLACE-SID ?event-id)
-;;;                                           ?preference
-;;;                                           UserIntroduction)
-;;;    (doRecord
-;;;      (ist-Information (SocialModelMtFn ?user)
-;;;        (UserCSInterest ?user ?preference))))
-;;;  )))
-
 ;;; OfferingACulturalProduct
 (isa UserIntroduction Collection)
 (genls UserIntroduction Informing)
 (comment UserIntroduction
   "UserIntroduction indicates that the sentence is a person introducing 
   themself to the Kiosk.")
-
-;;; introducesCulturalProductOffer
 
 (isa introducesPreference Predicate)
 (arity introducesPreference 2)
@@ -172,7 +148,7 @@
 ;;; NF 
 
 (<== (narrativeFunction (PresentationEventFn ?sid ?event-id)
-                        ?preference introducesPreference)
+                        ?preference UserIntroduction)
      (introducesPreference ?sid ?preference)
      ;; Introduce constant for the event ID
      (individualSatisfyingConditions 
