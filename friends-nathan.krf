@@ -107,19 +107,24 @@
     (doAnnounce "Running FotK narrative functions.")
     (doEADiscourseInterpretation
      UserProfiles-NFMt ?s-index ?next-index)
+    (doAgentPlan (getInfo ?dcase))
      ))))
 
 
 (preconditionForMethod
   (and (currentUser ?user)
-       ;;; how do i get info from my NF
+       (ist-information (DiscourseCaseFn ?dcase)
+                    (reasonablePreference ?preference))
+       (ist-information (DrsCaseFn ?dcase)
+                    (isa ?preference ?type))
   )
   (methodForAction
-    (gatherInfo)
+    (gatherInfo ?dcase)
     (actionSequence
       (TheList
+        (doAnnounce "Recording preference...")
         (doRecord (ist-information (SocialModelMtFn ?user)
-                    (CSInterest ?user ?preference))))))
+                    (CSInterest ?user ?type))))))
 )
 
 ;;;-----NF-----
