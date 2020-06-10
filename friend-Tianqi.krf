@@ -2,7 +2,7 @@
 (isa UserProfilesMt Microtheory)
 
 ;;; (achieve :receiver interaction-manager :content (startUserProfiles)) to start
-;;; (achieve :receiver interaction-manager :content (endUserProfiles)) to end
+;;; Type "Exit." or use (achieve :receiver interaction-manager :content (endUserProfiles)) to end
 
 (isa userProfilesActive Predicate)
 (arity userProfilesActive 0)
@@ -192,12 +192,15 @@
 (arg1Isa majorType Thing)
 
 (<== (majorType ?major)
+    (isa ?major ?majorType)
     (kbOnly 
         (useTransitiveInference
           (ist-Information UniversalVocabularyMt
-            (isa ?major FieldOfStudy)))))
+            (isa ?majorType FieldOfStudy)))))
+
 (<== (majorType ?major)
+    (isa ?major ?majorType)
     (kbOnly 
         (useTransitiveInference
           (ist-Information UniversalVocabularyMt
-            (isa ?major AcademicDepartment)))))
+            (isa ?majorType AcademicDepartment)))))
