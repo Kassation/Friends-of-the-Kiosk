@@ -154,7 +154,7 @@
     (doAnnounce "Received interests. Now, asking if user wants recommendations." (?sid))
     (doRecord 
       (ist-Information (SocialModelMtFn ?user) (FoodInterest ?user ?preference)))
-    (doAgentPlan (giveRecs ?sid ?dcase))
+    ;;;(doAgentPlan (giveRecs ?sid ?dcase))
      ))))
 
 (preconditionForMethod
@@ -177,11 +177,11 @@
       (isa ?user ?grade))
     (doRecord 
       (ist-Information (SocialModelMtFn ?user) (isa ?user ?grade)))
-    (doAgentPlan (giveRecs ?sid ?dcase))
+   ;;;(doAgentPlan (giveRecs ?sid ?dcase))
      ))))
 
-(isa giveRecs ComplexActionPredicate)
-(arity giveRecs 2)
+;;;(isa giveRecs ComplexActionPredicate)
+;;;(arity giveRecs 2)
 
 (preconditionForMethod
   (and (newReifiedUtterance ?system-utterance)
@@ -199,7 +199,7 @@
         "I recommend ~a." (TheList ?e) ?utterance-string)       
   )
   (methodForAction
-    (giveRecs ?sid ?dcase)
+    (getInfo ?sid ?dcase)
     (actionSequence
       (TheList 
         (doSayUtterance ?system-utterance ?utterance-string)
@@ -219,7 +219,7 @@
         "Fine, no recommendations for you, ~a!" (TheList ?user) ?utterance-string)       
   )
   (methodForAction
-    (giveRecs ?sid ?dcase)
+    (getInfo ?sid ?dcase)
     (actionSequence
       (TheList 
         (doSayUtterance ?system-utterance ?utterance-string)
