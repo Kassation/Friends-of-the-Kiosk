@@ -265,6 +265,13 @@
          (isa ?preference FieldOfStudy))))
 )
 
+(<== (reasonablePreference ?preference)
+     ;; CS Topic-type2
+     (kbOnly 
+      (useTransitiveInference
+       (ist-Information UniversalVocabularyMt 
+         (isa ?preference AcademicDepartment))))
+)
 
 ;;; Tell the abduction method something about your preferences
 ;;; Some weights needed because of the abductive policy being
