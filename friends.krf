@@ -346,15 +346,11 @@
 (<== (getResponse ?sdrs-id ?response)
      (ist-Information (DrsCaseFn ?sdrs-id)
       (isa ?thing ?response))
-      (kbOnly 
-        (useTransitiveInference
-          (ist-Information UniversalVocabularyMt
-            (isa ?response (NLResponseFn Affirmative-NLResponse))))))
+      (equals ?response (NLResponseFn Affirmative-NLResponse))
+)
 
 (<== (getResponse ?sdrs-id ?response)
      (ist-Information (DrsCaseFn ?sdrs-id)
       (isa ?thing ?response))
-      (kbOnly 
-        (useTransitiveInference
-          (ist-Information UniversalVocabularyMt
-            (isa ?response (NLResponseFn Negative-NLResponse))))))
+      (equals ?response (NLResponseFn Negative-NLResponse))
+)
