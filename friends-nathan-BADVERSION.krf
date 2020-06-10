@@ -108,7 +108,7 @@
     (doAnnounce "?dcase is ~a." (?dcase))
     (doEADiscourseInterpretation
      UserProfiles-NFMt ?s-index ?next-index)
-    (doAgentPlan (getInfo ?sid ?dcase))
+    (doAgentPlan (getInfo ?dcase))
      ))))
 
 
@@ -121,39 +121,19 @@
       (userProfilesActive)
       (outsourcedOnly (currentSentenceId ?sid))
       (currentUser ?user)
+      (generateMostAppropriateQuery ?dcase ?response)
       (ist-Information ?dcase
         (introducesPreference ?sid ?preference))
-      (isa ?preference FieldOfStudy)
       (formattedContentString
-       "Cool! Would you like recommendations on other things you might like, ~a?" (TheList ?user) ?utterance-string))
+       "OK. Are you an undergraduate or graduate student, ~a?" (TheList ?user) ?utterance-string))
  (methodForAction 
-  (getInfo ?sid ?dcase)
+  (getUserMajor ?sid ?dcase)
   (actionSequence
    (TheList 
     (doSayUtterance ?system-utterance ?utterance-string)
     (doAnnounce "said major, asking grade ERROR" (?sid))
     (doRecord 
       (ist-Information (SocialModelMtFn ?user) (CSInterest ?user ?preference)))
-     ))))
-
-(preconditionForMethod
- (and (newReifiedUtterance ?system-utterance)
-      (userProfilesActive)
-      (outsourcedOnly (currentSentenceId ?sid))
-      (currentUser ?user)
-      (ist-Information ?dcase
-        (introducesPreference ?sid ?preference))
-      (isa ?preference DefaultDisjointEdibleStuffType)
-      (formattedContentString
-       "OK. Are you an undergraduate or graduate student, ~a?" (TheList ?user) ?utterance-string))
- (methodForAction 
-  (getInfo ?sid ?dcase)
-  (actionSequence
-   (TheList 
-    (doSayUtterance ?system-utterance ?utterance-string)
-    (doAnnounce "Received interests. Now, asking if user wants recommendations." (?sid))
-    (doRecord 
-      (ist-Information (SocialModelMtFn ?user) (FoodInterest ?user ?preference)))
      ))))
 
 
@@ -196,29 +176,103 @@
        (discourseCaseForDrs ?dcase ?sid))
      (ist-Information ?dcase (isaPossibleCaseForSentence ?sdrs-id ?sid))
      (getPreference ?sdrs-id ?preference)
+     ;;;(sentenceIndicatesPreference ?sdrs-id ?pref-verb)
+     ;;;(sentenceLikesPreference ?sdrs-id ?pref-verb ?preference)
      )
 
-
-(isa getPreference Predicate)
-(arity getPreference 2)
-(arg1Isa getPreference CycLTerm)
-(arg2Isa getPreference FieldOfStudy)
-
-
 (<== (getPreference ?sdrs-id ?preference)
      (ist-Information (DrsCaseFn ?sdrs-id)
-      (isa ?thing ?preference))
-      (kbOnly 
+      (preferenceType ?preference)))
+
+(isa preferenceType Predicate)
+(arity preferenceType 1)
+(arg1Isa preferenceType Thing)
+
+(<== (preferenceType ?preference)
+    ;;; CS topic
+    (kbOnly 
         (useTransitiveInference
           (ist-Information UniversalVocabularyMt
-            (isa ?preference FieldOfStudy))))
+            (isa ?preference FieldOfStudy)))))
+
+(<== (preferenceType ?preference)
+    ;;; Food
+    (kbOnly 
+        (useTransitiveInference
+          (ist-Information UniversalVocabularyMt
+            (isa ?preference DefaultDisjointEdibleStuffType)))))
+
+
+;;; sentenceIndicatesOffer
+
+(isa sentenceIndicatesPreference Predicate)
+(arity sentenceIndicatesPreference 2)
+(arg1Isa sentenceIndicatesPreference CycLTerm)
+(arg2Isa sentenceIndicatesPreference Thing)
+(comment sentenceIndicatesPreference 
+  "(sentenceIndicatesPreference ?sdrs-id ?pref-verb) indicates that the sentences
+ whose DRS is ?sdrs-id has a verb suggesting a preference is being made, ?pref-verb")
+     
+(<== (sentenceIndicatesPreference ?sdrs-id ?pref-verb)
+     (ist-Information (DrsCaseFn ?sdrs-id)
+       (isa ?pref-verb (ExperiencingEmotionFn Like))))
+
+;;; sentenceOffersProduct
+
+(isa sentenceLikesPreference Predicate)
+(arity sentenceLikesPreference 3)
+(arg1Isa sentenceLikesPreference CycLTerm)
+(arg2Isa sentenceLikesPreference Thing)
+(arg3Isa sentenceLikesPreference Thing)
+(comment sentenceLikesPreference
+  "(sentenceLikesPreference ?sdrs-id ?pref-verb ?preference) indicates that
+ in sentence DRS ?sdrs-id, with verb indicating a preference ?pref-verb, the
+ preferred item is ?preference.")
+
+(<== (sentenceLikesPreference ?sdrs-id ?pref-verb ?preference)
+     (ist-Information (DrsCaseFn ?sdrs-id) 
+       (fe_event ?pref-verb ?preference))
+     (reasonablePreference ?preference))
+
+(<== (sentenceLikesPreference ?sdrs-id ?pref-verb ?preference)
+     (ist-Information (DrsCaseFn ?sdrs-id) 
+       (objectGiven ?pref-verb ?preference))
+     (reasonablePreference ?preference))
+
+(<== (sentenceLikesPreference ?sdrs-id ?pref-verb ?preference)
+     (ist-Information (DrsCaseFn ?sdrs-id) 
+       (situationTopic ?pref-verb ?preference))
+     (reasonablePreference ?preference))
+
+;;; reasonableConceptualWorkType
+
+(isa reasonablePreference Predicate)
+(arity reasonablePreference 1)
+(arg1Isa reasonablePreference Thing)
+(comment reasonablePreference
+  "(reasonablePreference ?thing) holds when ?thing is the sort of 
+  preference that can be saved by FotK.")
+
+(<== (reasonablePreference ?preference)
+        (ist-information (ist-Information EverythingPSC (isa ?preference ?food-type))
+        (ist-information (ist-Information EverythingPSC (isa ?food-type DefaultDisjointEdibleStuffType))
 )
 
-(<== (getPreference ?sdrs-id ?preference)
-     (ist-Information (DrsCaseFn ?sdrs-id)
-      (isa ?thing ?preference))
-      (kbOnly 
-        (useTransitiveInference
-          (ist-Information UniversalVocabularyMt
-            (isa ?preference DefaultDisjointEdibleStuffType))))
+(<== (reasonablePreference ?preference)
+        (isa ?preference ?field)
+        (kbOnly (useTransitiveInference (isa ?field FieldOfStudy)))
 )
+
+
+;;; Tell the abduction method something about your preferences
+;;; Some weights needed because of the abductive policy being
+;;; abductive-score-via-symbol-weights, but
+;;; by using an alternative to doEADiscourseInterpretation,
+;;; you can explore other abductive policies.
+
+(abductiveNLCollectionScore GivingSomething 10)
+(abductiveNLCollectionScore DesiringThat 10)
+(abductiveNLCollectionScore Like 10)
+(abductiveNLPredicateScore fe_event 10)
+(abductiveNLPredicateScore objectGiven 10)
+(abductiveNLPredicateScore situationTopic 10)
