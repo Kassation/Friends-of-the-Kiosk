@@ -27,7 +27,7 @@
 (in-microtheory (SocialModelMtFn NathanTimmerman))
 (isa NathanTimmerman NUStudent)
 ;;; (isa NathanTimmerman NUUndergraduate)
-(studentMajor NathanTimmerman ComputerScienceDepartment)
+(studentMajor NathanTimmerman ComputerScience)
 
 ;;;(UserCSInterest NathanTimmerman ArtificialIntelligence)                            
 (FoodInterest NathanTimmerman ApplePie)
@@ -47,7 +47,7 @@
 (in-microtheory (SocialModelMtFn JingZhang))
 (isa JingZhang NUStudent)
 ;;; (isa JingZhang NUMastersStudent)
-(studentMajor JingZhang ComputerScienceDepartment)
+(studentMajor JingZhang ComputerScience)
 
 (UserCSInterest JingZhang ArtificialIntelligence)                            
 (FoodInterest JingZhang ApplePie)
@@ -67,7 +67,7 @@
 (in-microtheory (SocialModelMtFn TianqiCai))
 (isa TianqiCai NUStudent)
 ;;; (isa TianqiCai NUMastersStudent)
-(studentMajor TianqiCai ComputerScienceDepartment)
+(studentMajor TianqiCai ComputerScience)
 
 ;;; (UserCSInterest TianqiCai ArtificialIntelligence)                            
 (FoodInterest TianqiCai ApplePie)
