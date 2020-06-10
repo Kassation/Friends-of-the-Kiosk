@@ -1,29 +1,8 @@
-(in-microtheory UserProfilesMt)
-(isa UserProfiles FirstOrderCollection)
-(isa UserProfile UserProfiles)
-(isa NathanTimmerman UserProfile) ;;; or “Nathan Timmerman”?
-;;; depends on how we can take user input and transform it
-(isa UserCSInterest FirstOrderCollection)
-;;; possible(/preferable?) to save these as a set?
-(isa UserCSInterest BinaryPredicate)
-(arity UserCSInterest 2)
-(arg1Isa UserCSInterest UserProfiles)
-(arg2Isa UserCSInterest FieldOfStudy)
-(UserCSInterest NathanTimmerman ArtificialIntelligence)
-;;; so when user says an interest, do:
-;;; (doRecord 
-;;;        (ist-Information UserProfilesMt (UserCSInterest ?user ?interest)))
-;;; NOTE: have to keep track of which user is currently being talked to
-;;; how?
-
-(isa currentUser Predicate)
-(arity currentUser 2)
-(arg1Isa currentUser IBTGeneration)
-(arg2Isa currentUser UserProfile)
-
-
 ;;; (achieve :receiver interaction-manager :content (startUserProfiles)) to start
+;;; (achieve :receiver interaction-manager :content (endUserProfiles)) to end
 (in-microtheory Interaction-Manager-KioskMt)
+
+(isa UserProfilesMt Microtheory)
 
 (isa userProfilesActive Predicate)
 (arity userProfilesActive 0)
@@ -31,151 +10,268 @@
   "(userProfilesActive) holds when the UserProfiles is being used to
    implement the Getting-to-know-people.")
 
-;;;-----START-----
+;;;-----START-----;;;
 (isa startUserProfiles ComplexActionPredicate)
 (arity startUserProfiles 0)
 (comment startUserProfiles
   "(startUserProfiles) tweaks the Interaction Manager to use semantic 
    interpretation methods that implement the Getting-to-know-people.")
 
-(preconditionForMethod 
- (true)
+(preconditionForMethod
+ (and (newReifiedUtterance ?system-utterance)
+      (currentUser ?user)
+      (formattedContentString
+        "Hello. What is your major, ~a?" (TheList ?user) ?utterance-string))
  (methodForAction
   (startUserProfiles)
   (actionSequence
-   (TheList 
+   (TheList
     (doRecordMembers
      (TheSet
       (ist-Information Interaction-Manager-KioskMt
-        (<== (preferInContext (answerQuestionViaEEs ?dcase)
+        (<== (preferInContext
+              (answerQuestionViaEEs ?dcase)
               ?seq1 ?seq2)
-             (containsPattern (doEADiscourseInterpretation ?mt ?s-id ?n-id) ?seq1)))
-      (ist-Information Interaction-Manager-KioskMt
-        (<== (preferInContext (answerQuestionViaEEs ?dcase) ?seq1 ?seq2)
-             (someArgumentHasPredicate ?seq1 userProfilesActive)))
+             (containsPattern (checkUPUnderstanding ?dcase)
+                              ?seq1)))
+      ;;; make new Mt for user
+      (isa (SocialModelMtFn ?user) Microtheory)
       (userProfilesActive)
       (genlMt Interaction-Manager-KioskMt UserProfilesMt)))
-    (doAnnounce "Starting UserProfiles. " nil)))))
+    (doAnnounce "Starting User Profiles...")
+    (doSayUtterance ?system-utterance ?utterance-string)))))
 
-;;;-----END-----
+;;;-----END-----;;;
 (isa endUserProfiles ComplexActionPredicate)
 (arity endUserProfiles 0)
 (comment endUserProfiles
   "(endUserProfiles) tweaks the Interaction Manager to use semantic 
    interpretation methods that implement the Getting-to-know-people.")
 
-(preconditionForMethod 
- (true)
- (methodForAction
-  (endUserProfiles)
-  (actionSequence
-   (TheList 
-    (doForgetMembers
-     (TheSet
-      (ist-Information Interaction-Manager-KioskMt
-        (<== (preferInContext (answerQuestionViaEEs ?dcase)
-              ?seq1 ?seq2)
-             (containsPattern (doEADiscourseInterpretation ?mt ?s-id ?n-id) ?seq1)))
-      (ist-Information Interaction-Manager-KioskMt
-        (<== (preferInContext (answerQuestionViaEEs ?dcase) ?seq1 ?seq2)
-             (someArgumentHasPredicate ?seq1 userProfilesActive)))
-      (userProfilesActive)
-      (genlMt Interaction-Manager-KioskMt UserProfilesMt)))
-    (doAnnounce "Ending UserProfiles. " nil)))))
-
-;;;-----INTERPRET-----
-
-
-
-(preconditionForMethod
- (and (newReifiedUtterance ?system-utterance)
-      (currentAgents ?agents)
-      (not (elementOf psi ?agents))
-      (outsourcedOnly (currentSentenceId ?sid))
-      (ist-Information ?dcase
-        (sentenceText ?sid ?user-utterance))
-      (different ?user-utterance "Yes." "No.")
-      (generateMostAppropriateQuery ?dcase ?response)
-      (subexpressionMatching (psikiSayText ?p-text) ?response ?st)
-      (ist-Information ?dcase
-        (sentenceInDiscourse ?sid ?s-index ?wordslist))
-      (evaluate ?next-index (PlusFn 1 ?s-index)))
- (methodForAction 
-  (answerQuestionViaEEs ?dcase)
-  (actionSequence
-   (TheList 
-    (doSayUtterance ?system-utterance ?p-text)
-    (doAnnounce "current ?sid: ~a~%" (?sid))
-    (doEADiscourseInterpretation
-     UserProfiles-NFMt ?s-index ?next-index)
-    (doAgentPlan
-     (getMoreInfo ?sid ?dcase))))))
-
-(isa getMoreInfo ComplexActionPredicate)
-(arity getMoreInfo 2)
-
 (preconditionForMethod
  (and (newReifiedUtterance ?system-utterance)
       (currentUser ?user)
-      (outsourcedOnly (currentSentenceId ?sentence-id))
-      (ist-Information ?dcase
-        (getUser ?sentence-id ?user))
       (formattedContentString
-       "You are ~a. " (TheList ?user) ?utterance-string))
+        "See ya!" (TheList ?user) ?utterance-string))
  (methodForAction
-  (getMoreInfo ?sid ?dcase)
+  (endUserProfiles)
   (actionSequence
    (TheList
-     ;;;(doRecord 
-     ;;;(ist-Information UserProfilesMt (currentUser ?sid ?user)))
-     (doSayUtterance ?system-utterance ?utterance-string)
-     (doAnnounce "You are. " nil)))))
+    (doForgetMembers
+     (TheSet
+      (ist-Information Interaction-Manager-KioskMt
+        (<== (preferInContext
+              (answerQuestionViaEEs ?dcase)
+              ?seq1 ?seq2)
+             (containsPattern (checkUPUnderstanding ?dcase)
+                              ?seq1)))
+      (userProfilesActive)
+      (genlMt Interaction-Manager-KioskMt UserProfilesMt)))
+    (doAnnounce "Shutting down User Profiles...")
+    (doSayUtterance ?system-utterance ?utterance-string)))))
 
-(preconditionForMethod
- (and (userProfilesActive)
-      (outsourcedOnly (currentSentenceId ?sid))
-      (ist-Information ?dcase
-        (sentenceText ?sid ?string))
-      (equals ?string "No.")
-      (newReifiedUtterance ?system-utterance)
-      (formattedContentString
-       "You said No. " (TheList) ?utterance-string))    
+
+(isa checkUPUnderstanding ComplexActionPredicate)
+(arity checkUPUnderstanding 1)
+(arg1Isa checkUPUnderstanding Microtheory)
+;;;(arg2Isa checkUPUnderstanding CycLTerm)
+;;;(arg3Isa checkUPUnderstanding Microtheory)
+(comment checkUPUnderstanding
+  "(checkUPUnderstanding ?dcase) does the semantic analysis
+   needed to recognize dialogue acts and domain semantics for FotK.")
+
+;;; Dispatch to checkUPUnderstanding if the game is active.
+(preconditionForMethod 
+    (userProfilesActive)
  (methodForAction
   (answerQuestionViaEEs ?dcase)
   (actionSequence
    (TheList
-    (doSayUtterance ?system-utterance ?utterance-string)))))
+    (doAnnounce "Using FotK methods.")
+    (checkUPUnderstanding ?dcase)))))
+
+(preconditionForMethod 
+ (and (userProfilesActive)
+      (outsourcedOnly (currentSentenceId ?sid))
+      (ist-Information ?dcase
+        (sentenceText ?sid ?user-utterance))
+      (generateMostAppropriateQuery ?dcase ?response)
+      (ist-Information ?dcase
+        (sentenceInDiscourse ?sid ?s-index ?wordslist))
+      (evaluate ?next-index (PlusFn 1 ?s-index))
+      (currentUser ?user))
+ (methodForAction 
+  (checkUPUnderstanding ?dcase)
+  (actionSequence
+   (TheList 
+    (doAnnounce "Running FotK narrative functions.")
+    (doAnnounce "?dcase is ~a." (?dcase))
+    (doEADiscourseInterpretation
+     UserProfiles-NFMt ?s-index ?next-index)
+    (doAgentPlan (getInfo ?sid ?dcase))
+     ))))
+
+
+(isa getInfo ComplexActionPredicate)
+(arity getInfo 2)
+;;;(arg1Isa getInfo Microtheory)
+
+(preconditionForMethod
+ (and (newReifiedUtterance ?system-utterance)
+      (userProfilesActive)
+      (outsourcedOnly (currentSentenceId ?sid))
+      (currentUser ?user)
+      (ist-Information ?dcase
+        (introducesPreference ?sid ?preference))
+      (isa ?preference FieldOfStudy)
+      (formattedContentString
+       "I see, so that's your major. Are you an Undergraduate or Graduate student, ~a? " (TheList ?user) ?utterance-string))
+ (methodForAction 
+  (getInfo ?sid ?dcase)
+  (actionSequence
+   (TheList 
+    (doSayUtterance ?system-utterance ?utterance-string)
+    (doAnnounce "said major, asking grade ERROR" (?sid))
+    (doRecord 
+      (ist-Information (SocialModelMtFn ?user) (studentMajor ?user ?preference)))
+     ))))
+
+(preconditionForMethod
+ (and (newReifiedUtterance ?system-utterance)
+      (userProfilesActive)
+      (outsourcedOnly (currentSentenceId ?sid))
+      (currentUser ?user)
+      (ist-Information ?dcase
+        (introducesPreference ?sid ?preference))
+      (isa ?preference DefaultDisjointEdibleStuffType)
+      (formattedContentString
+       "I see, so that's what you like. Do you want some recommendations, ~a?" (TheList ?user) ?utterance-string))
+ (methodForAction 
+  (getInfo ?sid ?dcase)
+  (actionSequence
+   (TheList 
+    (doSayUtterance ?system-utterance ?utterance-string)
+    (doAnnounce "Received interests. Now, asking if user wants recommendations." (?sid))
+    (doRecord 
+      (ist-Information (SocialModelMtFn ?user) (FoodInterest ?user ?preference)))
+     ))))
+
+(preconditionForMethod
+ (and (newReifiedUtterance ?system-utterance)
+      (userProfilesActive)
+      (outsourcedOnly (currentSentenceId ?sid))
+      (currentUser ?user)
+      (ist-Information ?dcase
+        (askForGrade ?sid ?grade))
+	  (isa ?grade StudentByEducationalOrganizationLevel)
+      (formattedContentString
+       "I see, so that's your grade. What food or drink do you like, ~a?" (TheList ?user) ?utterance-string))
+ (methodForAction 
+  (getInfo ?sid ?dcase)
+  (actionSequence
+   (TheList 
+    (doSayUtterance ?system-utterance ?utterance-string)
+    (doAnnounce "said grade, asking food" (?sid))
+    (doRecordMembers
+      (isa ?user ?grade))
+    (doRecord 
+      (ist-Information (SocialModelMtFn ?user) (isa ?user ?grade)))
+     ))))
 
 ;;;-----NF-----
 (in-microtheory UserProfiles-NFMt)
 
 (queryForInterpretation 0
                         (narrativeFunction (PresentationEventFn :REPLACE-SID ?event-id)
-                                           ?user
+                                           ?preference
                                            UserIntroduction))
+
+;;; OfferingACulturalProduct
 (isa UserIntroduction Collection)
-(genls UserIntroduction Informing)
+(genls UserIntroduction CommunicationAct-Single)
 (comment UserIntroduction
-  "UserIntroduction indicates that the sentence is a person introducing themself to the Kiosk.")
+  "UserIntroduction indicates that the sentence is a person introducing 
+  themself to the Kiosk.")
+
+(isa introducesPreference Predicate)
+(arity introducesPreference 2)
+(arg1Isa introducesPreference IBTGeneration)
+(arg2Isa introducesPreference Thing)
+(comment introducesPreference
+  "(introducesPreference ?pef ?po) indicates that there is an introduction
+ event ?pef which constitutes stating a preference ?po.")
+
+;;; NF 
 
 (<== (narrativeFunction (PresentationEventFn ?sid ?event-id)
-                        ?user UserIntroduction)
-     (getUser ?sid ?user)
-     (individualSatisfyingConditions
+                        ?preference UserIntroduction)
+     (introducesPreference ?sid ?preference)
+     ;; Introduce constant for the event ID
+     (individualSatisfyingConditions 
       ?event-id IBTGeneration
-      (TheSet (groundExpression ?user))))
+      (TheSet (groundExpression ?preference))))
 
-(isa getUser Predicate)
-(arity getUser 2)
-(isa isName Predicate)
-(arity isName 2)
-
-(<== (getUser ?sid ?user)
+(<== (introducesPreference ?sid
+                           ?preference)
      (ist-Information (DrsCaseFn ?sid)
        (discourseCaseForDrs ?dcase ?sid))
      (ist-Information ?dcase (isaPossibleCaseForSentence ?sdrs-id ?sid))
-     (isName ?sdrs-id ?user))
+     (getPreference ?sdrs-id ?preference)
+     )
 
-(<== (isName ?sdrs-id ?name)
+
+(isa getPreference Predicate)
+(arity getPreference 2)
+(arg1Isa getPreference CycLTerm)
+(arg2Isa getPreference FieldOfStudy)
+
+
+(<== (getPreference ?sdrs-id ?preference)
      (ist-Information (DrsCaseFn ?sdrs-id)
-       (isa ?name HumanGivenName)))
+      (isa ?thing ?preference))
+      (kbOnly 
+        (useTransitiveInference
+          (ist-Information UniversalVocabularyMt
+            (isa ?preference FieldOfStudy))))
+)
+
+(<== (getPreference ?sdrs-id ?preference)
+     (ist-Information (DrsCaseFn ?sdrs-id)
+      (isa ?thing ?preference))
+      (kbOnly 
+        (useTransitiveInference
+          (ist-Information UniversalVocabularyMt
+            (isa ?preference DefaultDisjointEdibleStuffType))))
+)
+
+(isa askForGrade Predicate)
+(arity askForGrade 2)
+(arg1Isa askForGrade IBTGeneration)
+(arg2Isa askForGrade Thing)
+
+(<== (narrativeFunction (PresentationEventFn ?sid ?event-id)
+                        ?grade UserIntroduction)
+     (askForGrade ?sid ?grade)
+     (individualSatisfyingConditions ?event-id IBTGeneration
+      (TheSet (groundExpression ?grade))))
+
+(isa getGrade Predicate)
+(arity getGrade 2)
+(arg1Isa getGrade CycLTerm)
+(arg2Isa getGrade Thing)
+
+(<== (askForGrade ?sid ?grade)
+     (ist-Information (DrsCaseFn ?sid)
+       (discourseCaseForDrs ?dcase ?sid))
+     (ist-Information ?dcase (isaPossibleCaseForSentence ?sdrs-id ?sid))
+     (getGrade ?sdrs-id ?grade)
+     )
+
+(<== (getGrade ?sdrs-id ?grade)
+     (ist-Information (DrsCaseFn ?sdrs-id)
+      (isa ?thing ?grade))
+      (kbOnly 
+        (useTransitiveInference
+          (ist-Information UniversalVocabularyMt
+            (isa ?grade StudentByEducationalOrganizationLevel)))))
+
