@@ -35,7 +35,8 @@
              (containsPattern (checkUPUnderstanding ?dcase)
                               ?seq1)))
       ;;; make new Mt for user
-      (isa (SocialModelMtFn ?user) Microtheory)
+      (ist-Information KioskFriendsDataMt
+        (isa (SocialModelMtFn ?user) Microtheory))
       (userProfilesActive)
       (genlMt Interaction-Manager-KioskMt UserProfilesMt)))
     (doAnnounce "Starting User Profiles...")
@@ -191,12 +192,14 @@
        (ist-Information ?dcase
         (yesOrNo ?sid ?response))
 	     (equals ?response (NLResponseFn Affirmative-NLResponse))
-       (ist-information CyclistsMt
+       (ist-Information CyclistsMt
         (isa ?other HumanCyclist))
-       (ist-information KioskFriendsDataMt
+       (ist-Information KioskFriendsDataMt
         (predictUserInterest (CaseFn ?other) (CaseFn ?user) (TheSet) ?e))
+       (ist-Information KioskFriendsDataMt
+        (extractInterest ?e ?rec))
        (formattedContentString
-        "I recommend ~a." (TheList ?e) ?utterance-string)       
+        "I recommend ~a." (TheList ?rec) ?utterance-string)       
   )
   (methodForAction
     (getInfo ?sid ?dcase)
@@ -216,7 +219,7 @@
         (yesOrNo ?sid ?response))
 	     (equals ?response (NLResponseFn Negative-NLResponse))
        (formattedContentString
-        "Fine, no recommendations for you, ~a!" (TheList ?user) ?utterance-string)       
+        "Alright, ~a! Thanks for chatting." (TheList ?user) ?utterance-string)       
   )
   (methodForAction
     (getInfo ?sid ?dcase)
