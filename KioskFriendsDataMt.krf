@@ -102,6 +102,7 @@
     (candidateInferenceContent ?candidate ?e)
     )
 
+;;; extracts predicted interest only if its of type DefaultDisjointEdibleStuffType
 (<== (extractInterest ?e ?rec)
     (evaluate ?a (Arg2Fn ?e))
     (evaluate ?rec (Arg1Fn ?a))
