@@ -119,11 +119,11 @@
 (preconditionForMethod
   (and (currentUser ?user)
        (ist-Information ?dcase
-          (drsForDiscourse ?discourse-id)
+          (sentenceText ?sid ?user-utterance)
           (reasonablePreference ?preference))
        ;;;(ist-information ?dcase
        ;;;             (reasonablePreference ?preference))
-       (ist-information (DrsCaseFn ?discourse-id)
+       (ist-information (DrsCaseFn ?sid)
                     (isa ?preference ?type))
        (equals ?type FieldOfStudy)
   )
@@ -131,7 +131,7 @@
     (getInfo ?dcase)
     (actionSequence
       (TheList
-        (doAnnounce "Recording preference...")
+        (doAnnounce "Recording preference.")
         (doRecord (ist-information (SocialModelMtFn ?user)
                     (CSInterest ?user ?type))))))
 )
@@ -257,7 +257,7 @@
          (isa ?preference DefaultDisjointEdibleStuffType))))
 )
 
-(<== (reasonablePreference ?product)
+(<== (reasonablePreference ?preference)
      ;; CS Topic
      (kbOnly 
       (useTransitiveInference
