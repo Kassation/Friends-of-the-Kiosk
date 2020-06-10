@@ -128,7 +128,7 @@
        (equals ?type FieldOfStudy)
   )
   (methodForAction
-    (gatherInfo ?dcase)
+    (getInfo ?dcase)
     (actionSequence
       (TheList
         (doAnnounce "Recording preference...")
@@ -148,7 +148,7 @@
        (equals ?type DefaultDisjointEdibleStuffType)
   )
   (methodForAction
-    (gatherInfo ?dcase)
+    (getInfo ?dcase)
     (actionSequence
       (TheList
         (doAnnounce "Recording preference...")
