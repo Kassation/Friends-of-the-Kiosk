@@ -80,6 +80,10 @@
   "(checkUPUnderstanding ?dcase) does the semantic analysis
    needed to recognize dialogue acts and domain semantics for FotK.")
 
+(isa getInfo ComplexActionPredicate)
+(arity getInfo 1)
+(arg1Isa getInfo Microtheory)
+
 ;;; Dispatch to checkUPUnderstanding if the game is active.
 (preconditionForMethod 
     (userProfilesActive)
@@ -105,6 +109,7 @@
   (actionSequence
    (TheList 
     (doAnnounce "Running FotK narrative functions.")
+    (doAnnounce "?dcase is ~a." (?dcase))
     (doEADiscourseInterpretation
      UserProfiles-NFMt ?s-index ?next-index)
     (doAgentPlan (getInfo ?dcase))
@@ -113,10 +118,14 @@
 
 (preconditionForMethod
   (and (currentUser ?user)
-       (ist-information (DiscourseCaseFn ?dcase)
-                    (reasonablePreference ?preference))
-       (ist-information (DrsCaseFn ?dcase)
+       (ist-Information ?dcase
+          (drsForDiscourse ?discourse-id)
+          (reasonablePreference ?preference))
+       ;;;(ist-information ?dcase
+       ;;;             (reasonablePreference ?preference))
+       (ist-information (DrsCaseFn ?discourse-id)
                     (isa ?preference ?type))
+       (equals ?type FieldOfStudy)
   )
   (methodForAction
     (gatherInfo ?dcase)
@@ -125,6 +134,26 @@
         (doAnnounce "Recording preference...")
         (doRecord (ist-information (SocialModelMtFn ?user)
                     (CSInterest ?user ?type))))))
+)
+
+(preconditionForMethod
+  (and (currentUser ?user)
+       (ist-Information ?dcase
+          (drsForDiscourse ?discourse-id)
+          (reasonablePreference ?preference))
+       ;;;(ist-information ?dcase
+       ;;;             (reasonablePreference ?preference))
+       (ist-information (DrsCaseFn ?discourse-id)
+                    (isa ?preference ?type))
+       (equals ?type DefaultDisjointEdibleStuffType)
+  )
+  (methodForAction
+    (gatherInfo ?dcase)
+    (actionSequence
+      (TheList
+        (doAnnounce "Recording preference...")
+        (doRecord (ist-information (SocialModelMtFn ?user)
+                    (FoodInterest ?user ?type))))))
 )
 
 ;;;-----NF-----

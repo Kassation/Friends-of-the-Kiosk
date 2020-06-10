@@ -29,7 +29,7 @@
 ;;; (isa NathanTimmerman NUUndergraduate)
 (studentMajor NathanTimmerman ComputerScienceDepartment)
 
-(UserCSInterest NathanTimmerman ArtificialIntelligence)                            
+;;;(UserCSInterest NathanTimmerman ArtificialIntelligence)                            
 (FoodInterest NathanTimmerman ApplePie)
 (FoodInterest NathanTimmerman CoconutMilk)
 
