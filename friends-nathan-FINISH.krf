@@ -21,7 +21,7 @@
  (and (newReifiedUtterance ?system-utterance)
       (currentUser ?user)
       (formattedContentString
-        "Hey hey hey! What food or CS topics do you like?" (TheList ?user) ?utterance-string))
+        "Hey, ~a! What food or CS topics do you like?" (TheList ?user) ?utterance-string))
  (methodForAction
   (startUserProfiles)
   (actionSequence
@@ -121,19 +121,21 @@
       (userProfilesActive)
       (outsourcedOnly (currentSentenceId ?sid))
       (currentUser ?user)
+      (different ?user-utterance "Yes." "No.")
       (ist-Information ?dcase
         (introducesPreference ?sid ?preference))
       (isa ?preference FieldOfStudy)
       (formattedContentString
-       "Cool! Would you like recommendations on other things you might like, ~a?" (TheList ?user) ?utterance-string))
+       "Cool! Would you like recommendations on other things you might like, ~a? Type Yes or No." (TheList ?user) ?utterance-string))
  (methodForAction 
   (getInfo ?sid ?dcase)
   (actionSequence
    (TheList 
     (doSayUtterance ?system-utterance ?utterance-string)
-    (doAnnounce "said major, asking grade ERROR" (?sid))
+    (doAnnounce "Received interests. Now, asking if user wants recommendations." (?sid))
     (doRecord 
       (ist-Information (SocialModelMtFn ?user) (CSInterest ?user ?preference)))
+    (doAgentPlan (giveRecs ?sid ?dcase))
      ))))
 
 (preconditionForMethod
@@ -141,11 +143,12 @@
       (userProfilesActive)
       (outsourcedOnly (currentSentenceId ?sid))
       (currentUser ?user)
+      (different ?user-utterance "Yes." "No.")
       (ist-Information ?dcase
         (introducesPreference ?sid ?preference))
       (isa ?preference DefaultDisjointEdibleStuffType)
       (formattedContentString
-       "OK. Are you an undergraduate or graduate student, ~a?" (TheList ?user) ?utterance-string))
+       "Cool! Would you like recommendations on other things you might like, ~a? Type Yes or No." (TheList ?user) ?utterance-string))
  (methodForAction 
   (getInfo ?sid ?dcase)
   (actionSequence
@@ -154,7 +157,31 @@
     (doAnnounce "Received interests. Now, asking if user wants recommendations." (?sid))
     (doRecord 
       (ist-Information (SocialModelMtFn ?user) (FoodInterest ?user ?preference)))
+    (doAgentPlan (giveRecs ?sid ?dcase))
      ))))
+
+(preconditionForMethod
+  (and (newReifiedUtterance ?system-utterance)
+       (userProfilesActive)
+       (outsourcedOnly (currentSentenceId ?sid))
+       (currentUser ?user)
+       (ist-Information ?dcase
+          (sentenceText ?sid ?user-utterance))
+       (equals ?user-utterance "Yes.")
+       (ist-information KioskFriendsDataMt
+        (predictUserInterest ?base (CaseFn ?user) (TheSet) ?e))
+       (formattedContentString
+        "I recommend ~a." (TheList ?e) ?utterance-string)       
+  )
+  (methodForAction
+    (giveRecs ?sid ?dcase)
+    (actionSequence
+      (TheList 
+        (doSayUtterance ?system-utterance ?utterance-string)
+        (doAnnounce "Recommendation given." (?sid))
+     )))
+)
+
 
 
 ;;;-----NF-----

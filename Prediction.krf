@@ -18,4 +18,5 @@
     (matchBetween ?base ?target ?c ?match)
     (bestMapping ?match ?mapping)
     (candidateInferenceOf ?candidate ?mapping)
-    (candidateInferenceContent ?candidate ?e))
+    (candidateInferenceContent ?candidate ?e)
+    )
