@@ -154,6 +154,7 @@
     (doAnnounce "Received interests. Now, asking if user wants recommendations." (?sid))
     (doRecord 
       (ist-Information (SocialModelMtFn ?user) (FoodInterest ?user ?preference)))
+    (doAgentPlan (giveRecs ?sid ?dcase))
      ))))
 
 (preconditionForMethod
@@ -176,7 +177,30 @@
       (isa ?user ?grade))
     (doRecord 
       (ist-Information (SocialModelMtFn ?user) (isa ?user ?grade)))
+    (doAgentPlan (giveRecs ?sid ?dcase))
      ))))
+
+(preconditionForMethod
+  (and (newReifiedUtterance ?system-utterance)
+       (userProfilesActive)
+       (outsourcedOnly (currentSentenceId ?sid))
+       (currentUser ?user)
+       (ist-Information ?dcase
+          (sentenceText ?sid ?user-utterance))
+       (equals ?user-utterance "Yes.")
+       (ist-information KioskFriendsDataMt
+        (predictUserInterest ?base (CaseFn ?user) (TheSet) ?e))
+       (formattedContentString
+        "I recommend ~a." (TheList ?e) ?utterance-string)       
+  )
+  (methodForAction
+    (giveRecs ?sid ?dcase)
+    (actionSequence
+      (TheList 
+        (doSayUtterance ?system-utterance ?utterance-string)
+        (doAnnounce "Recommendation given." (?sid))
+     )))
+)
 
 ;;;-----NF-----
 (in-microtheory UserProfiles-NFMt)
