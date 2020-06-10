@@ -146,13 +146,13 @@
         (introducesPreference ?sid ?preference))
       (isa ?preference DefaultDisjointEdibleStuffType)
       (formattedContentString
-       "Who doesn't like ~a!? Would you like some recommendations?" (TheList ?preference ?user) ?utterance-string))
+       "Who doesn't like ~a!? Would you like a recommendation?" (TheList ?preference ?user) ?utterance-string))
  (methodForAction 
   (getInfo ?sid ?dcase)
   (actionSequence
    (TheList 
     (doSayUtterance ?system-utterance ?utterance-string)
-    (doAnnounce "Received interests. Now, asking if user wants recommendations." (?sid))
+    (doAnnounce "Received interests. Now, asking if user wants recommendation." (?sid))
     (doRecord 
       (ist-Information (SocialModelMtFn ?user) (FoodInterest ?user ?preference)))
     ;;;(doAgentPlan (giveRecs ?sid ?dcase))
