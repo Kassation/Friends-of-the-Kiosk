@@ -183,24 +183,21 @@
      (ist-Information ?dcase (isaPossibleCaseForSentence ?sdrs-id ?sid))
      (getMajor ?sdrs-id ?major)
      )
+     
 (<== (getMajor ?sdrs-id ?major)
      (ist-Information (DrsCaseFn ?sdrs-id)
-      (majorType ?major)))
-
-(isa majorType Predicate)
-(arity majorType 1)
-(arg1Isa majorType Thing)
-
-(<== (majorType ?major)
-    (isa ?major ?majorType)
-    (kbOnly 
+      (isa ?thing ?major))
+      (kbOnly 
         (useTransitiveInference
           (ist-Information UniversalVocabularyMt
-            (isa ?majorType FieldOfStudy)))))
+            (isa ?major FieldOfStudy))))
+)
 
-(<== (majorType ?major)
-    (isa ?major ?majorType)
-    (kbOnly 
+(<== (getMajor ?sdrs-id ?major)
+     (ist-Information (DrsCaseFn ?sdrs-id)
+      (isa ?thing ?major))
+      (kbOnly 
         (useTransitiveInference
           (ist-Information UniversalVocabularyMt
-            (isa ?majorType AcademicDepartment)))))
+            (isa ?major AcademicDepartment))))
+)
