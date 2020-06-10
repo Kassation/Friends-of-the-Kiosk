@@ -117,24 +117,24 @@
 ;;;(arg1Isa getInfo Microtheory)
 
 (preconditionForMethod
- (and (newReifiedUtterance ?system-utterance)
-      (userProfilesActive)
-      (outsourcedOnly (currentSentenceId ?sid))
-      (currentUser ?user)
-      (ist-Information ?dcase
-        (introducesPreference ?sid ?preference))
-      (isa ?preference FieldOfStudy)
-      (formattedContentString
-       "Cool! Would you like recommendations on other things you might like, ~a?" (TheList ?user) ?utterance-string))
- (methodForAction 
-  (getInfo ?sid ?dcase)
-  (actionSequence
-   (TheList 
-    (doSayUtterance ?system-utterance ?utterance-string)
-    (doAnnounce "said major, asking grade ERROR" (?sid))
-    (doRecord 
-      (ist-Information (SocialModelMtFn ?user) (CSInterest ?user ?preference)))
-     ))))
+  (and (currentUser ?user)
+       (ist-Information ?dcase
+          (drsForDiscourse ?discourse-id)
+          (reasonablePreference ?preference))
+       ;;;(ist-information ?dcase
+       ;;;             (reasonablePreference ?preference))
+       (ist-information (DrsCaseFn ?discourse-id)
+                    (isa ?preference ?type))
+       (equals ?type FieldOfStudy)
+  )
+  (methodForAction
+    (getInfo ?dcase)
+    (actionSequence
+      (TheList
+        (doAnnounce "Recording preference...")
+        (doRecord (ist-information (SocialModelMtFn ?user)
+                    (CSInterest ?user ?type))))))
+)
 
 (preconditionForMethod
  (and (newReifiedUtterance ?system-utterance)
@@ -203,8 +203,6 @@
 (arity getPreference 2)
 (arg1Isa getPreference CycLTerm)
 (arg2Isa getPreference FieldOfStudy)
-
-
 (<== (getPreference ?sdrs-id ?preference)
      (ist-Information (DrsCaseFn ?sdrs-id)
       (isa ?thing ?preference))
