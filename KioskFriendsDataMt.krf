@@ -76,5 +76,10 @@
 (indexedProperName (TheList tianqi) cai TianqiCai)
 (indexedProperName (TheList) tianqi TianqiCai)
 
+(in-microtheory CyclistsMt)
+(isa NathanTimmerman HumanCyclist)
+(isa JingZhang HumanCyclist)
+(isa TianqiCai HumanCyclist)
+
 
 

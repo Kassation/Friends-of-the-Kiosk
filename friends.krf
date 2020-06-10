@@ -180,18 +180,43 @@
     (doAgentPlan (giveRecs ?sid ?dcase))
      ))))
 
+(isa giveRecs ComplexActionPredicate)
+(arity giveRecs 2)
+
 (preconditionForMethod
   (and (newReifiedUtterance ?system-utterance)
        (userProfilesActive)
        (outsourcedOnly (currentSentenceId ?sid))
        (currentUser ?user)
        (ist-Information ?dcase
-          (sentenceText ?sid ?user-utterance))
-       (equals ?user-utterance "Yes.")
+        (yesOrNo ?sid ?response))
+	     (equals ?response (NLResponseFn Affirmative-NLResponse))
+       (ist-information CyclistsMt
+        (isa ?other HumanCyclist))
        (ist-information KioskFriendsDataMt
-        (predictUserInterest ?base (CaseFn ?user) (TheSet) ?e))
+        (predictUserInterest (CaseFn ?other) (CaseFn ?user) (TheSet) ?e))
        (formattedContentString
         "I recommend ~a." (TheList ?e) ?utterance-string)       
+  )
+  (methodForAction
+    (giveRecs ?sid ?dcase)
+    (actionSequence
+      (TheList 
+        (doSayUtterance ?system-utterance ?utterance-string)
+        (doAnnounce "Recommendation given." (?sid))
+     )))
+)
+
+(preconditionForMethod
+  (and (newReifiedUtterance ?system-utterance)
+       (userProfilesActive)
+       (outsourcedOnly (currentSentenceId ?sid))
+       (currentUser ?user)
+       (ist-Information ?dcase
+        (yesOrNo ?sid ?response))
+	     (equals ?response (NLResponseFn Negative-NLResponse))
+       (formattedContentString
+        "Fine, no recommendations for you, ~a!" (TheList ?user) ?utterance-string)       
   )
   (methodForAction
     (giveRecs ?sid ?dcase)
@@ -299,3 +324,37 @@
           (ist-Information UniversalVocabularyMt
             (isa ?grade StudentByEducationalOrganizationLevel)))))
 
+
+(<== (narrativeFunction (PresentationEventFn ?sid ?event-id)
+                        ?grade UserIntroduction)
+     (yesOrNo ?sid ?response)
+     (individualSatisfyingConditions ?event-id IBTGeneration
+      (TheSet (groundExpression ?grade))))
+
+(isa getResponse Predicate)
+(arity getResponse 2)
+(arg1Isa getResponse CycLTerm)
+(arg2Isa getResponse Thing)
+
+(<== (yesOrNo ?sid ?response)
+     (ist-Information (DrsCaseFn ?sid)
+       (discourseCaseForDrs ?dcase ?sid))
+     (ist-Information ?dcase (isaPossibleCaseForSentence ?sdrs-id ?sid))
+     (getResponse ?sdrs-id ?response)
+     )
+
+(<== (getResponse ?sdrs-id ?response)
+     (ist-Information (DrsCaseFn ?sdrs-id)
+      (isa ?thing ?response))
+      (kbOnly 
+        (useTransitiveInference
+          (ist-Information UniversalVocabularyMt
+            (isa ?response (NLResponseFn Affirmative-NLResponse))))))
+
+(<== (getResponse ?sdrs-id ?response)
+     (ist-Information (DrsCaseFn ?sdrs-id)
+      (isa ?thing ?response))
+      (kbOnly 
+        (useTransitiveInference
+          (ist-Information UniversalVocabularyMt
+            (isa ?response (NLResponseFn Negative-NLResponse))))))
