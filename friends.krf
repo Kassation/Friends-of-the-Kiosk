@@ -125,7 +125,7 @@
         (introducesPreference ?sid ?preference))
       (isa ?preference FieldOfStudy)
       (formattedContentString
-       "OK. Are you an Undergraduate or Graduate student, ~a? " (TheList ?user) ?utterance-string))
+       "I see, so that's your major. Are you an Undergraduate or Graduate student, ~a? " (TheList ?user) ?utterance-string))
  (methodForAction 
   (getInfo ?sid ?dcase)
   (actionSequence
@@ -133,7 +133,7 @@
     (doSayUtterance ?system-utterance ?utterance-string)
     (doAnnounce "said major, asking grade ERROR" (?sid))
     (doRecord 
-      (ist-Information (SocialModelMtFn ?user) (CSInterest ?user ?preference)))
+      (ist-Information (SocialModelMtFn ?user) (studentMajor ?user ?preference)))
      ))))
 
 (preconditionForMethod
@@ -145,7 +145,7 @@
         (introducesPreference ?sid ?preference))
       (isa ?preference DefaultDisjointEdibleStuffType)
       (formattedContentString
-       "OK. Do you want some recommendations, ~a?" (TheList ?user) ?utterance-string))
+       "I see, so that's what you like. Do you want some recommendations, ~a?" (TheList ?user) ?utterance-string))
  (methodForAction 
   (getInfo ?sid ?dcase)
   (actionSequence
@@ -165,7 +165,7 @@
         (askForGrade ?sid ?grade))
 	  (isa ?grade StudentByEducationalOrganizationLevel)
       (formattedContentString
-       "OK. What food or drink do you like, ~a?" (TheList ?user) ?utterance-string))
+       "I see, so that's your grade. What food or drink do you like, ~a?" (TheList ?user) ?utterance-string))
  (methodForAction 
   (getInfo ?sid ?dcase)
   (actionSequence
