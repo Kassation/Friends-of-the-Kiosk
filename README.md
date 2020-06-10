@@ -2,6 +2,7 @@
 getting-to-know-people example:
 
 KIOSK starts.
+
 KIOSK: Hello. What is your major, ccait??
 
 USER: Computer science.
@@ -23,4 +24,5 @@ KIOSK: I recommend ~a./Fine, no recommendations for you, ccait!
 USER: OK.
 
 KIOSK: See ya! 
+
 KIOSK ends.
